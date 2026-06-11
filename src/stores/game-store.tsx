@@ -4,6 +4,15 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { MockDB, Profile, PlanetState, SustainabilityLog, DailyChallenge, Achievement, LeaderboardEntry, ChatMessage, Group } from "@/lib/mock-db";
 import { supabase } from "@/lib/supabase";
 import { SupabaseService } from "@/services/supabase-service";
+import {
+  calculateGreenScoreDelta,
+  applyGreenScore,
+  calculateXPLevel,
+  calculatePlanetUpdates,
+  classifyDetectiveSeverity,
+  aggregateCategoryTotals,
+  getLevelName as getLevelNameUtil,
+} from "@/lib/carbon-utils";
 
 export interface DetectiveFinding {
   category: string;
@@ -235,11 +244,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // b. Calculate new XP and Green Score
       const newXP = currentProfile.xp + xpEarned;
-      const scoreDelta = carbonOffset > 0 
-        ? Math.min(5, Math.ceil(carbonOffset * 2)) 
-        : -Math.min(8, Math.ceil(Math.abs(carbonOffset) * 2.5));
-      const newGreenScore = Math.max(10, Math.min(100, currentProfile.green_score + scoreDelta));
-      const newLevel = Math.max(1, Math.floor(newXP / 1000) + 1);
+      const scoreDelta = calculateGreenScoreDelta(carbonOffset);
+      const newGreenScore = applyGreenScore(currentProfile.green_score, scoreDelta);
+      const { level: newLevel } = calculateXPLevel(newXP);
 
       await SupabaseService.updateProfile(userId, {
         xp: newXP,
@@ -248,31 +255,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       // c. Calculate Planet state changes
-      const isPositive = carbonOffset > 0;
-      const offsetMagnitude = Math.abs(carbonOffset);
-      const planetUpdates: Partial<PlanetState> = {};
-
-      if (isPositive) {
-        planetUpdates.pollution = currentPlanet.pollution - offsetMagnitude * 0.03;
-        planetUpdates.desertification = currentPlanet.desertification - offsetMagnitude * 0.02;
-        if (category === "transport") {
-          planetUpdates.atmosphere_clarity = currentPlanet.atmosphere_clarity + offsetMagnitude * 0.05;
-        } else if (category === "diet") {
-          planetUpdates.wildlife = currentPlanet.wildlife + 0.03;
-          planetUpdates.vegetation = currentPlanet.vegetation + 0.02;
-        } else if (category === "energy") {
-          planetUpdates.atmosphere_clarity = currentPlanet.atmosphere_clarity + offsetMagnitude * 0.04;
-        } else if (category === "waste") {
-          planetUpdates.vegetation = currentPlanet.vegetation + 0.04;
-        }
-      } else {
-        planetUpdates.pollution = currentPlanet.pollution + offsetMagnitude * 0.05;
-        planetUpdates.desertification = currentPlanet.desertification + offsetMagnitude * 0.03;
-        planetUpdates.atmosphere_clarity = currentPlanet.atmosphere_clarity - offsetMagnitude * 0.04;
-        planetUpdates.vegetation = currentPlanet.vegetation - offsetMagnitude * 0.02;
-        planetUpdates.wildlife = currentPlanet.wildlife - offsetMagnitude * 0.03;
-      }
-
+      const planetUpdates = calculatePlanetUpdates(
+        category,
+        carbonOffset,
+        currentPlanet
+      );
       await SupabaseService.updatePlanetState(userId, planetUpdates);
 
       // Increment local challenges trackers as client-side feedback
@@ -373,20 +360,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Carbon Detective computation logic
   const getDetectiveFindings = useCallback((): DetectiveFinding[] => {
     const currentLogs = logs.length > 0 ? logs : MockDB.getLogs();
-    
-    // Group absolute emissions by category
-    const categoryTotals: Record<string, number> = {
-      transport: 0,
-      diet: 0,
-      energy: 0,
-      waste: 0,
-    };
-
-    currentLogs.forEach((log) => {
-      const cat = log.category in categoryTotals ? log.category : "waste";
-      categoryTotals[cat] += log.co2_emission;
-    });
-
+    const categoryTotals = aggregateCategoryTotals(currentLogs);
     const total = Object.values(categoryTotals).reduce((sum, v) => sum + v, 0);
 
     const config: Record<string, { desc: string; rec: string }> = {
@@ -408,25 +382,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       },
     };
 
-    return Object.entries(categoryTotals).map(([category, value]) => {
-      const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-      let severity: "high" | "medium" | "low" = "low";
-      
-      if (percentage > 40 || value > 8) {
-        severity = "high";
-      } else if (percentage > 20 || value > 4) {
-        severity = "medium";
-      }
-
-      return {
-        category,
-        totalEmissions: parseFloat(value.toFixed(1)),
-        percentage,
-        severity,
-        description: config[category]?.desc || "Unoptimized utility activity.",
-        recommendation: config[category]?.rec || "Unplug idle appliances and log active recycling.",
-      };
-    }).sort((a, b) => b.totalEmissions - a.totalEmissions);
+    return Object.entries(categoryTotals).map(([category, value]) => ({
+      category,
+      totalEmissions: parseFloat(value.toFixed(1)),
+      percentage: total > 0 ? Math.round((value / total) * 100) : 0,
+      severity: classifyDetectiveSeverity(value, total),
+      description: config[category]?.desc || "Unoptimized utility activity.",
+      recommendation: config[category]?.rec || "Unplug idle appliances and log active recycling.",
+    })).sort((a, b) => b.totalEmissions - a.totalEmissions);
   }, [logs]);
 
   const fallbackProfile = profile || MockDB.getProfile();

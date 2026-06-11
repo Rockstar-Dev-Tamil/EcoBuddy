@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { useGame } from "@/stores/game-store";
+import { getLevelName, calculateXPLevel } from "@/lib/carbon-utils";
 import { 
   Flame, 
   Leaf, 
@@ -21,8 +23,20 @@ import {
   Activity,
   FlameKindling
 } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { motion, AnimatePresence } from "framer-motion";
+
+// Dynamically import Recharts — it's heavy (~200 kB) and only needed on chart tab
+const DynamicBarChart = dynamic(
+  () => import("recharts").then((mod) => mod.BarChart),
+  { ssr: false, loading: () => <div className="w-full h-52 animate-pulse bg-white/[0.02] rounded-xl" /> }
+);
+const DynamicBar = dynamic(() => import("recharts").then((m) => m.Bar), { ssr: false });
+const DynamicXAxis = dynamic(() => import("recharts").then((m) => m.XAxis), { ssr: false });
+const DynamicYAxis = dynamic(() => import("recharts").then((m) => m.YAxis), { ssr: false });
+const DynamicCartesianGrid = dynamic(() => import("recharts").then((m) => m.CartesianGrid), { ssr: false });
+const DynamicTooltip = dynamic(() => import("recharts").then((m) => m.Tooltip), { ssr: false });
+const DynamicResponsiveContainer = dynamic(() => import("recharts").then((m) => m.ResponsiveContainer), { ssr: false });
+const DynamicCell = dynamic(() => import("recharts").then((m) => m.Cell), { ssr: false });
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -62,15 +76,13 @@ export default function DashboardPage() {
     setIsLoggingAction(null);
   };
 
-  // Compile logs data for Recharts Bar Chart
-  const chartData = React.useMemo(() => {
+  // Compile logs data for Recharts Bar Chart (memoized - only recalculates when logs change)
+  const chartData = useMemo(() => {
     const categories = ["transport", "diet", "energy", "waste"];
     return categories.map((cat) => {
-      // Calculate total emissions in logs
       const total = logs
         .filter((l) => l.category === cat)
         .reduce((sum, l) => sum + l.co2_emission, 0);
-
       return {
         name: cat.charAt(0).toUpperCase() + cat.slice(1),
         CO2: parseFloat(total.toFixed(1)),
@@ -78,12 +90,14 @@ export default function DashboardPage() {
     });
   }, [logs]);
 
-  // Aggregate emissions & offsets
-  const totalEmissions = logs.reduce((sum, l) => sum + l.co2_emission, 0).toFixed(1);
-  const totalOffsets = logs.reduce((sum, l) => sum + l.carbon_offset, 0).toFixed(1);
+  // Aggregate emissions & offsets (memoized)
+  const { totalEmissions, totalOffsets } = useMemo(() => ({
+    totalEmissions: logs.reduce((sum, l) => sum + l.co2_emission, 0).toFixed(1),
+    totalOffsets: logs.reduce((sum, l) => sum + l.carbon_offset, 0).toFixed(1),
+  }), [logs]);
 
-  // Carbon Detective Findings
-  const findings = getDetectiveFindings();
+  // Carbon Detective Findings (memoized)
+  const findings = useMemo(() => getDetectiveFindings(), [getDetectiveFindings]);
 
   // Find user rank and details
   const userRank = React.useMemo(() => {
@@ -127,8 +141,10 @@ export default function DashboardPage() {
     return "Seed";
   };
 
-  const xpProgress = (profile.xp % 1000) / 10;
-  const xpRemaining = 1000 - (profile.xp % 1000);
+  // XP / level metrics — use carbon-utils helper
+  const { xpInLevel, xpToNext, progressPercent: xpProgressPct } = calculateXPLevel(profile.xp);
+  const xpProgress = xpProgressPct;
+  const xpRemaining = xpToNext;
 
   // Framer Motion Animation Variants
   const containerVariants = {
@@ -307,18 +323,18 @@ export default function DashboardPage() {
                   className="w-full h-full flex flex-col justify-between"
                 >
                   <div className="w-full h-52 mt-2">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={chartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                    <DynamicResponsiveContainer width="100%" height="100%">
+                      <DynamicBarChart data={chartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
                         <defs>
                           <linearGradient id="barGlow" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stopColor="#00E676" stopOpacity={0.85} />
                             <stop offset="100%" stopColor="#1DE9B6" stopOpacity={0.25} />
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" />
-                        <XAxis dataKey="name" stroke="#666" style={{ fontSize: 10, fontWeight: 600 }} />
-                        <YAxis stroke="#666" style={{ fontSize: 10, fontWeight: 600 }} />
-                        <Tooltip
+                        <DynamicCartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" />
+                        <DynamicXAxis dataKey="name" stroke="#666" style={{ fontSize: 10, fontWeight: 600 }} />
+                        <DynamicYAxis stroke="#666" style={{ fontSize: 10, fontWeight: 600 }} />
+                        <DynamicTooltip
                           cursor={{ fill: "rgba(255,255,255,0.02)", radius: 4 }}
                           contentStyle={{ 
                             backgroundColor: "#0a0f0a", 
@@ -331,17 +347,17 @@ export default function DashboardPage() {
                           }}
                           labelClassName="font-syne font-bold text-accent mb-1"
                         />
-                        <Bar dataKey="CO2" fill="url(#barGlow)" radius={[6, 6, 0, 0]}>
+                        <DynamicBar dataKey="CO2" fill="url(#barGlow)" radius={[6, 6, 0, 0]}>
                           {chartData.map((entry, idx) => (
-                            <Cell 
+                            <DynamicCell 
                               key={`cell-${idx}`} 
                               className="hover:opacity-100 transition-opacity duration-300"
                               style={{ filter: "drop-shadow(0 0 4px rgba(0, 230, 118, 0.2))" }}
                             />
                           ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
+                        </DynamicBar>
+                      </DynamicBarChart>
+                    </DynamicResponsiveContainer>
                   </div>
                   
                   <div className="flex justify-around items-center bg-white/[0.02] border border-white/5 rounded-xl p-3 mt-4 text-center">
@@ -442,7 +458,11 @@ export default function DashboardPage() {
               <span className="text-accent">{xpRemaining} XP to Lvl {profile.level + 1}</span>
             </div>
           </div>
-          <div className="text-[10px] text-zinc-400 bg-white/[0.02] border border-white/5 px-2.5 py-1.5 rounded-lg flex items-center justify-between">
+          <div className="text-[10px] text-zinc-400 bg-white/[0.02] border border-white/5 px-2.5 py-1.5 rounded-lg flex items-center justify-between"
+            role="status"
+            aria-live="polite"
+            aria-label="Achievement unlocked status"
+          >
             <div className="flex items-center gap-1">
               <Sparkles className="w-3 h-3 text-yellow-500 shrink-0" />
               <span className="font-semibold">Achievements Unlocked:</span>
@@ -708,10 +728,15 @@ export default function DashboardPage() {
         >
           <div className="flex justify-between items-start">
             <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Detective Report</span>
-            <AlertTriangle className="w-4 h-4 text-red-400 animate-pulse" />
+            <AlertTriangle className="w-4 h-4 text-red-400 animate-pulse" aria-hidden="true" />
           </div>
 
-          <div className="my-2">
+          <div
+            className="my-2"
+            role={findings.length > 0 ? "alert" : "status"}
+            aria-live="polite"
+            aria-atomic="true"
+          >
             {findings.length > 0 ? (
               <div>
                 <div className="flex justify-between items-baseline gap-2">

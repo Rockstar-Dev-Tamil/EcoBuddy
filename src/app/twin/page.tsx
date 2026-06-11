@@ -406,7 +406,13 @@ function TwinChatClient() {
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col gap-5">
+              <div
+                className="flex flex-col gap-5"
+                role="log"
+                aria-live="polite"
+                aria-label="Conversation with Sprig"
+                aria-relevant="additions"
+              >
                 {chats.map((chat) => {
                   const { cleanText, action } = parseActionTag(chat.message);
                   const isLogged = loggedActions[chat.id] || false;
@@ -457,7 +463,7 @@ function TwinChatClient() {
 
                 {/* Leaf Typing Indicator */}
                 {isSending && (
-                  <div className="flex justify-start">
+                  <div className="flex justify-start" role="status" aria-label="Sprig is thinking">
                     <div className="flex gap-3 max-w-[85%] flex-row">
                       <div className="w-8 h-8 rounded-full bg-white/5 border border-white/5 text-zinc-400 flex items-center justify-center shrink-0">
                         <Bot className="w-4 h-4" />

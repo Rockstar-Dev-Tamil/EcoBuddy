@@ -356,7 +356,11 @@ export default function EcoSnapPage() {
             )}
 
             {errorMsg && (
-              <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl flex items-center gap-2 font-syne">
+              <div
+                className="flex items-center gap-2 text-red-400 text-xs font-semibold mt-2"
+                role="alert"
+                aria-live="assertive"
+              >
                 <ShieldAlert className="w-4 h-4" />
                 <span>{errorMsg}</span>
               </div>
@@ -375,6 +379,10 @@ export default function EcoSnapPage() {
                 exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.3 }}
                 className="glass-panel p-6 rounded-2xl border border-white/5 flex flex-col justify-between h-full bg-zinc-950/20"
+                role="status"
+                aria-live="polite"
+                aria-label={`Scan result: ${scanResult.description}`}
+                aria-atomic="true"
               >
                 <div>
                   {/* Category and Title */}

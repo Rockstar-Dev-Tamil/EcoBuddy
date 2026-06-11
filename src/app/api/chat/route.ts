@@ -10,11 +10,24 @@ const isGeminiConfigured = (): boolean => {
 
 export async function POST(req: Request) {
   try {
-    const { message, history } = await req.json();
+    const body = await req.json();
+    const { message: rawMessage, history } = body;
+
+    // ─── Server-side input sanitization ──────────────────────────────────────
+    if (!rawMessage || typeof rawMessage !== "string") {
+      return NextResponse.json({ error: "Message is required and must be a string" }, { status: 400 });
+    }
+
+    // Strip HTML / script tags to prevent injection into the Gemini prompt context
+    const stripped = rawMessage.replace(/<[^>]*>/g, "").trim();
+
+    // Clamp to 2000 characters — prevents prompt injection overflows
+    const message = stripped.slice(0, 2_000);
 
     if (!message) {
-      return NextResponse.json({ error: "Message is required" }, { status: 400 });
+      return NextResponse.json({ error: "Message cannot be empty after sanitization" }, { status: 400 });
     }
+    // ─── End sanitization ─────────────────────────────────────────────────────
 
     // FALLBACK MOCK CHAT INTELLIGENCE
     if (!isGeminiConfigured()) {

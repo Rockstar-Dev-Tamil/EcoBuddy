@@ -177,11 +177,51 @@ export function heuristicParseOCR(ocrText: string, labels: string[], filename: s
 
 export async function POST(req: Request) {
   try {
-    const { imageBase64, filename } = await req.json();
+    const body = await req.json();
+    const { imageBase64, filename } = body;
 
-    if (!imageBase64) {
-      return NextResponse.json({ error: "Image data is required" }, { status: 400 });
+    // ─── Server-side input validation ────────────────────────────────────────
+    // 1. Presence check
+    if (!imageBase64 || typeof imageBase64 !== "string") {
+      return NextResponse.json({ error: "imageBase64 is required and must be a string" }, { status: 400 });
     }
+
+    // 2. Size guard — base64 of a 5 MB file is ~6.8 million chars
+    const MAX_BASE64_CHARS = 7_000_000;
+    if (imageBase64.length > MAX_BASE64_CHARS) {
+      return NextResponse.json({ error: "Image payload exceeds the 5 MB limit" }, { status: 413 });
+    }
+
+    // 3. MIME type allowlist — prevents processing of arbitrary file types
+    const ALLOWED_MIME_TYPES = new Set([
+      "image/png",
+      "image/jpeg",
+      "image/jpg",
+      "image/webp",
+      "image/gif",
+    ]);
+
+    const mimeMatch = imageBase64.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9\-.+]+);base64,/);
+    if (!mimeMatch) {
+      return NextResponse.json({ error: "Invalid image data URI format" }, { status: 400 });
+    }
+
+    const mimeType = mimeMatch[1].toLowerCase();
+    if (!ALLOWED_MIME_TYPES.has(mimeType)) {
+      return NextResponse.json(
+        { error: `Unsupported image type '${mimeType}'. Allowed: png, jpeg, webp, gif` },
+        { status: 415 }
+      );
+    }
+
+    // 4. Sanitize filename — strip path traversal and limit length
+    const rawFilename: string = typeof filename === "string" ? filename : "upload";
+    const safeFilename = rawFilename
+      .replace(/[/\\?%*:|"<>]/g, "_")  // strip path/shell special chars
+      .replace(/\.\./g, "_")            // prevent directory traversal
+      .slice(0, 255);
+
+    // ─── End validation ───────────────────────────────────────────────────────
 
     // Convert base64 data to GoogleGenerativeAI format
     const matches = imageBase64.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
@@ -189,8 +229,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid image format" }, { status: 400 });
     }
 
-    const mimeType = matches[1];
     const base64Data = matches[2];
+
 
     // Helper function for local mock scans
     const getLocalMockResult = (fname: string) => {
@@ -309,7 +349,7 @@ Do not wrap the response in markdown blocks or write any other text, just output
             const jsonStr = text.replace(/```json/g, "").replace(/```/g, "").trim();
             parsedData = JSON.parse(jsonStr);
           } else {
-            parsedData = heuristicParseOCR(ocrText, labels, filename);
+            parsedData = heuristicParseOCR(ocrText, labels, safeFilename);
           }
         }
       } catch (e) {
@@ -319,7 +359,7 @@ Do not wrap the response in markdown blocks or write any other text, just output
 
     if (!parsedData) {
       if (!isGeminiConfigured()) {
-        return NextResponse.json(getLocalMockResult(filename));
+        return NextResponse.json(getLocalMockResult(safeFilename));
       }
       
       const genAI = new GoogleGenerativeAI(apiKey!);
