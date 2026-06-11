@@ -145,7 +145,7 @@ export default function CommunityPage() {
     }
   };
 
-  if (!mounted) {
+  if (!mounted || !profile) {
     return (
       <div className="flex-grow flex flex-col bg-[#0A0F0A] text-white">
         <div className="flex-grow flex items-center justify-center min-h-[400px]">

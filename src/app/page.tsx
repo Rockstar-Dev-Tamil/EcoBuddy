@@ -14,10 +14,12 @@ import {
   Compass, 
   Globe, 
   ArrowRight,
-  User
+  User,
+  AlertTriangle
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SupabaseService } from "@/services/supabase-service";
+import { useGame } from "@/stores/game-store";
 import { SprigAvatar } from "@/components/sprig-avatar";
 
 // Dynamically import the 3D PlanetViewer to prevent SSR/hydration mismatch errors
@@ -95,6 +97,7 @@ const bgParticles = Array.from({ length: 15 }).map((_, i) => {
 
 export default function LandingPage() {
   const router = useRouter();
+  const { userId, isLoading: isStoreLoading } = useGame();
 
   // Intro loading state transitions
   const [introStep, setIntroStep] = useState(0); // 0 = loading leaf, 1 = morphing to logo, 2 = main app revealed
@@ -103,12 +106,20 @@ export default function LandingPage() {
   // Auth states
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState("");
+  const [isOtpSent, setIsOtpSent] = useState(false);
+  const [otpToken, setOtpToken] = useState("");
 
-  // Social Proof sequential items state
+  // Redirect to dashboard if already authenticated
+  useEffect(() => {
+    if (!isStoreLoading && userId) {
+      router.push("/dashboard");
+    }
+  }, [userId, isStoreLoading, router]);
+
+  // Rotate social proof list items every 2.5s
   const socialProofItems = [
     { text: "AI-powered sustainability companion", icon: "🌎" },
     { text: "Personalized living ecosystem", icon: "🌱" },
@@ -118,7 +129,6 @@ export default function LandingPage() {
 
   const [activeSocialProofIdx, setActiveSocialProofIdx] = useState(0);
 
-  // Rotate social proof list items every 2.5s
   useEffect(() => {
     if (isIntroLoading) return;
     const timer = setInterval(() => {
@@ -148,84 +158,82 @@ export default function LandingPage() {
     };
   }, []);
 
-
-
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError("");
     setIsLoading(true);
 
-    if (!email || !password || (isSignUp && !username)) {
+    if (!email || (isSignUp && !username && !isOtpSent)) {
       setAuthError("Please fill out all required fields.");
       setIsLoading(false);
       return;
     }
 
-    if (password.length < 6) {
-      setAuthError("Password must be at least 6 characters.");
+    if (!SupabaseService.isEnabled()) {
+      setAuthError("Database connection not configured. Please set your Supabase environment variables.");
       setIsLoading(false);
       return;
     }
 
     try {
-      if (SupabaseService.isEnabled()) {
-        if (isSignUp) {
-          const { data, error } = await supabase!.auth.signUp({
-            email,
-            password,
-            options: {
-              data: {
-                username: username,
-              }
-            }
-          });
-
-          if (error) throw error;
-          
-          if (data.user) {
-            await SupabaseService.getProfile(data.user.id, email);
-            router.push("/dashboard");
-          } else {
-            setAuthError("Registration successful! Please check your email inbox to confirm your registration.");
+      if (!isOtpSent) {
+        // Step 1: Send OTP code
+        const { error } = await supabase!.auth.signInWithOtp({
+          email,
+          options: {
+            data: isSignUp ? {
+              username: username.trim(),
+              full_name: username.trim()
+            } : undefined,
+            emailRedirectTo: `${window.location.origin}/auth/callback`
           }
-        } else {
-          const { data, error } = await supabase!.auth.signInWithPassword({
-            email,
-            password
-          });
+        });
 
-          if (error) throw error;
-          if (data.user) {
-            router.push("/dashboard");
-          }
-        }
+        if (error) throw error;
+        setIsOtpSent(true);
       } else {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        // Step 2: Verify OTP code
+        if (!otpToken || otpToken.length !== 6) {
+          setAuthError("Please enter a valid 6-digit verification code.");
+          setIsLoading(false);
+          return;
+        }
+
+        const { error } = await supabase!.auth.verifyOtp({
+          email,
+          token: otpToken.trim(),
+          type: "email"
+        });
+
+        if (error) throw error;
         router.push("/dashboard");
       }
     } catch (err) {
       console.error("Authentication Error:", err);
-      setAuthError(err instanceof Error ? err.message : "Authentication failed. Please check your credentials.");
+      setAuthError(err instanceof Error ? err.message : "Authentication failed. Please check your inputs.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleGoogleAuth = async () => {
+    setAuthError("");
     setIsLoading(true);
+    
+    if (!SupabaseService.isEnabled()) {
+      setAuthError("Database connection not configured. Please set your Supabase environment variables.");
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      if (SupabaseService.isEnabled()) {
-        const { error } = await supabase!.auth.signInWithOAuth({
-          provider: "google",
-          options: {
-            redirectTo: `${window.location.origin}/dashboard`
-          }
-        });
-        if (error) throw error;
-      } else {
-        await new Promise((resolve) => setTimeout(resolve, 800));
-        router.push("/dashboard");
-      }
+      const { error } = await supabase!.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
+        }
+      });
+      if (error) throw error;
     } catch (err) {
       console.error("Google Auth error:", err);
       setAuthError(err instanceof Error ? err.message : "Failed to start Google OAuth.");
@@ -551,123 +559,197 @@ export default function LandingPage() {
                   {/* Subtle top indicator bar */}
                   <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#00E676]/30 to-transparent" />
 
-                  {/* Header title */}
-                  <div className="text-center">
-                    <h2 className="font-syne font-extrabold text-xl sm:text-2xl text-white tracking-wide">
-                      {isSignUp ? "Create an Account" : "Access EcoBuddy"}
-                    </h2>
-                    <p className="text-xs text-zinc-400 mt-1.5 font-medium leading-relaxed">
-                      {isSignUp ? "Begin your environmental journey" : "Synchronize your sustainability logs"}
-                    </p>
-                  </div>
+                  {!SupabaseService.isEnabled() ? (
+                    <div className="flex flex-col gap-4 text-center p-4 bg-yellow-500/10 border border-yellow-500/20 text-yellow-450 rounded-2xl" role="alert">
+                      <AlertTriangle className="w-8 h-8 mx-auto animate-bounce text-yellow-500" aria-hidden="true" />
+                      <h3 className="font-syne font-bold text-sm text-yellow-400">Database Offline</h3>
+                      <p className="text-[10px] leading-relaxed text-zinc-400">
+                        Supabase environment variables are missing. Please set <code>NEXT_PUBLIC_SUPABASE_URL</code> and <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> to connect to your live database.
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Header title */}
+                      <div className="text-center">
+                        <h2 className="font-syne font-extrabold text-xl sm:text-2xl text-white tracking-wide">
+                          {isOtpSent 
+                            ? "Verify Your Email" 
+                            : (isSignUp ? "Create an Account" : "Access EcoBuddy")}
+                        </h2>
+                        <p className="text-xs text-zinc-400 mt-1.5 font-medium leading-relaxed">
+                          {isOtpSent 
+                            ? `Enter the 6-digit code sent to ${email}`
+                            : (isSignUp ? "Begin your environmental journey" : "Synchronize your sustainability logs")}
+                        </p>
+                      </div>
 
-                  {/* Google Authenticator (PRIMARY) */}
-                  <div className="flex flex-col gap-2">
-                    <button
-                      onClick={handleGoogleAuth}
-                      disabled={isLoading}
-                      id="btn-auth-google"
-                      className="w-full h-[56px] px-6 bg-white hover:bg-slate-100 text-slate-900 font-syne font-bold rounded-full text-sm transition-all duration-300 flex items-center justify-center gap-3 cursor-pointer shadow-lg hover:shadow-white/10 active:scale-[0.98] disabled:opacity-50"
-                    >
-                      <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22c-.07-.22-.12-.45-.12-.63z"/>
-                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                      </svg>
-                      <span>Continue with Google</span>
-                    </button>
-                  </div>
+                      {/* Google Authenticator (PRIMARY) - only when OTP is not sent */}
+                      {!isOtpSent && (
+                        <>
+                          <div className="flex flex-col gap-2">
+                            <button
+                              onClick={handleGoogleAuth}
+                              disabled={isLoading}
+                              id="btn-auth-google"
+                              aria-label="Continue with Google"
+                              className="w-full h-[56px] px-6 bg-white hover:bg-slate-100 text-slate-900 font-syne font-bold rounded-full text-sm transition-all duration-300 flex items-center justify-center gap-3 cursor-pointer shadow-lg hover:shadow-white/10 active:scale-[0.98] disabled:opacity-50"
+                            >
+                              <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22c-.07-.22-.12-.45-.12-.63z"/>
+                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                              </svg>
+                              <span>Continue with Google</span>
+                            </button>
+                          </div>
 
-                  {/* Or statement */}
-                  <div className="relative flex py-1 items-center">
-                    <div className="flex-grow border-t border-white/5" />
-                    <span className="flex-shrink mx-3 text-[10px] text-zinc-500 font-bold uppercase tracking-widest font-mono">or continue with email</span>
-                    <div className="flex-grow border-t border-white/5" />
-                  </div>
+                          {/* Or statement */}
+                          <div className="relative flex py-1 items-center">
+                            <div className="flex-grow border-t border-white/5" />
+                            <span className="flex-shrink mx-3 text-[10px] text-zinc-500 font-bold uppercase tracking-widest font-mono">or continue with email</span>
+                            <div className="flex-grow border-t border-white/5" />
+                          </div>
+                        </>
+                      )}
 
-                  {/* Auth Form Submission (SECONDARY) */}
-                  <form onSubmit={handleAuthSubmit} className="flex flex-col gap-4">
-                    
-                    {isSignUp && (
-                      <div className="relative">
-                        <input
-                          type="text"
-                          required
-                          value={username}
-                          onChange={(e) => setUsername(e.target.value)}
-                          placeholder="Username"
-                          className="w-full h-[56px] pl-12 pr-4 bg-white/[0.03] border border-white/10 focus:border-accent/40 focus:ring-1 focus:ring-accent/40 text-xs text-white placeholder-zinc-500 rounded-full transition-all focus:outline-none"
-                        />
-                        <div className="absolute left-4.5 top-5 text-zinc-500">
-                          <User className="w-4 h-4" />
+                      {/* Auth Form Submission (SECONDARY) */}
+                      <form onSubmit={handleAuthSubmit} className="flex flex-col gap-4">
+                        
+                        {!isOtpSent ? (
+                          <>
+                            {isSignUp && (
+                              <div className="relative">
+                                <label htmlFor="auth-username" className="sr-only">Username</label>
+                                <input
+                                  id="auth-username"
+                                  type="text"
+                                  required
+                                  value={username}
+                                  onChange={(e) => setUsername(e.target.value)}
+                                  placeholder="Username"
+                                  aria-label="Username"
+                                  className="w-full h-[56px] pl-12 pr-4 bg-white/[0.03] border border-white/10 focus:border-accent/40 focus:ring-1 focus:ring-accent/40 text-xs text-white placeholder-zinc-500 rounded-full transition-all focus:outline-none"
+                                />
+                                <div className="absolute left-4.5 top-5 text-zinc-500">
+                                  <User className="w-4 h-4" aria-hidden="true" />
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="relative">
+                              <label htmlFor="auth-email" className="sr-only">Email address</label>
+                              <input
+                                id="auth-email"
+                                type="email"
+                                required
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="Email address"
+                                aria-label="Email address"
+                                className="w-full h-[56px] pl-12 pr-4 bg-white/[0.03] border border-white/10 focus:border-accent/40 focus:ring-1 focus:ring-accent/40 text-xs text-white placeholder-zinc-500 rounded-full transition-all focus:outline-none"
+                              />
+                              <div className="absolute left-4.5 top-5 text-zinc-500">
+                                <Mail className="w-4 h-4" aria-hidden="true" />
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="relative">
+                              <label htmlFor="auth-email-readonly" className="sr-only">Sending to email</label>
+                              <input
+                                id="auth-email-readonly"
+                                type="email"
+                                disabled
+                                value={email}
+                                aria-label="Sending to email"
+                                className="w-full h-[56px] pl-12 pr-4 bg-white/[0.01] border border-white/5 text-xs text-zinc-500 rounded-full opacity-60 cursor-not-allowed focus:outline-none"
+                              />
+                              <div className="absolute left-4.5 top-5 text-zinc-650">
+                                <Mail className="w-4 h-4" aria-hidden="true" />
+                              </div>
+                            </div>
+
+                            <div className="relative">
+                              <label htmlFor="auth-otp" className="sr-only">Verification Code</label>
+                              <input
+                                id="auth-otp"
+                                type="text"
+                                required
+                                maxLength={6}
+                                value={otpToken}
+                                onChange={(e) => setOtpToken(e.target.value.replace(/\D/g, ""))}
+                                placeholder="6-digit code"
+                                aria-label="6-digit verification code"
+                                className="w-full h-[56px] pl-12 pr-4 bg-white/[0.03] border border-white/10 focus:border-accent/40 focus:ring-1 focus:ring-accent/40 text-xs text-white placeholder-zinc-500 rounded-full text-center font-bold tracking-[0.5em] focus:outline-none"
+                              />
+                              <div className="absolute left-4.5 top-5 text-zinc-500">
+                                <Lock className="w-4 h-4" aria-hidden="true" />
+                              </div>
+                            </div>
+                          </>
+                        )}
+
+                        <button
+                          type="submit"
+                          disabled={isLoading}
+                          id="btn-auth-submit"
+                          className="w-full h-[56px] bg-white/5 border border-white/10 hover:border-accent/30 hover:bg-accent-dim/15 text-white font-syne font-bold rounded-full text-xs transition-all duration-300 cursor-pointer flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50"
+                        >
+                          <span>
+                            {isLoading 
+                              ? "Processing..." 
+                              : (isOtpSent 
+                                  ? (isSignUp ? "Verify & Sign Up" : "Verify & Log In") 
+                                  : "Send Verification Code")}
+                          </span>
+                          <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                        </button>
+
+                        {isOtpSent && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsOtpSent(false);
+                              setOtpToken("");
+                              setAuthError("");
+                            }}
+                            className="text-[11px] text-zinc-400 hover:text-white transition-colors underline cursor-pointer self-center mt-1"
+                          >
+                            Go Back / Change Email
+                          </button>
+                        )}
+                      </form>
+
+                      {authError && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          role="alert"
+                          className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] rounded-2xl text-center leading-relaxed"
+                        >
+                          {authError}
+                        </motion.div>
+                      )}
+
+                      {/* Toggle Sign Up/Log In link */}
+                      {!isOtpSent && (
+                        <div className="text-center pt-2">
+                          <button
+                            onClick={() => {
+                              setIsSignUp(!isSignUp);
+                              setAuthError("");
+                            }}
+                            id="btn-auth-toggle"
+                            className="text-[11px] font-bold text-accent hover:text-[#39ff14] transition-colors cursor-pointer font-syne hover:underline"
+                          >
+                            {isSignUp ? "Already have an account? Log In" : "Don't have an account? Sign Up"}
+                          </button>
                         </div>
-                      </div>
-                    )}
-
-                    <div className="relative">
-                      <input
-                        type="email"
-                        required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Email address"
-                        className="w-full h-[56px] pl-12 pr-4 bg-white/[0.03] border border-white/10 focus:border-accent/40 focus:ring-1 focus:ring-accent/40 text-xs text-white placeholder-zinc-500 rounded-full transition-all focus:outline-none"
-                      />
-                      <div className="absolute left-4.5 top-5 text-zinc-500">
-                        <Mail className="w-4 h-4" />
-                      </div>
-                    </div>
-
-                    <div className="relative">
-                      <input
-                        type="password"
-                        required
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Password (min. 6 chars)"
-                        className="w-full h-[56px] pl-12 pr-4 bg-white/[0.03] border border-white/10 focus:border-accent/40 focus:ring-1 focus:ring-accent/40 text-xs text-white placeholder-zinc-500 rounded-full transition-all focus:outline-none"
-                      />
-                      <div className="absolute left-4.5 top-5 text-zinc-500">
-                        <Lock className="w-4 h-4" />
-                      </div>
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={isLoading}
-                      id="btn-auth-submit"
-                      className="w-full h-[56px] bg-white/5 border border-white/10 hover:border-accent/30 hover:bg-accent-dim/15 text-white font-syne font-bold rounded-full text-xs transition-all duration-300 cursor-pointer flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50"
-                    >
-                      <span>{isLoading ? "Validating..." : isSignUp ? "Sign Up" : "Log In"}</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                  </form>
-
-                  {authError && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] rounded-2xl text-center leading-relaxed"
-                    >
-                      {authError}
-                    </motion.div>
+                      )}
+                    </>
                   )}
-
-                  {/* Toggle Sign Up/Log In link */}
-                  <div className="text-center pt-2">
-                    <button
-                      onClick={() => {
-                        setIsSignUp(!isSignUp);
-                        setAuthError("");
-                      }}
-                      id="btn-auth-toggle"
-                      className="text-[11px] font-bold text-accent hover:text-[#39ff14] transition-colors cursor-pointer font-syne hover:underline"
-                    >
-                      {isSignUp ? "Already have an account? Log In" : "Don't have an account? Sign Up"}
-                    </button>
-                  </div>
-
                 </div>
               </motion.div>
 

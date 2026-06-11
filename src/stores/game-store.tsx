@@ -108,7 +108,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (session?.user) {
           setUserId(session.user.id);
           const metadata = session.user.user_metadata;
-          const googleName = metadata?.full_name || metadata?.name;
+          const googleName = metadata?.username || metadata?.full_name || metadata?.name;
           const googleAvatar = metadata?.avatar_url || metadata?.picture;
           loadSupabaseData(session.user.id, session.user.email, googleName, googleAvatar);
         } else {
@@ -123,7 +123,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (session?.user) {
             setUserId(session.user.id);
             const metadata = session.user.user_metadata;
-            const googleName = metadata?.full_name || metadata?.name;
+            const googleName = metadata?.username || metadata?.full_name || metadata?.name;
             const googleAvatar = metadata?.avatar_url || metadata?.picture;
             await loadSupabaseData(session.user.id, session.user.email, googleName, googleAvatar);
           } else {

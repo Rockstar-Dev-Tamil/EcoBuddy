@@ -102,7 +102,7 @@ export default function ProfilePage() {
 
   const unlockedCount = achievements.filter((a) => a.unlocked).length;
 
-  if (!mounted) {
+  if (!mounted || !profile) {
     return (
       <div className="flex-1 flex flex-col pb-20 lg:pb-0 bg-background text-foreground">
         <div className="flex-1 flex items-center justify-center min-h-[400px]">

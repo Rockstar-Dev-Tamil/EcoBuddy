@@ -29,13 +29,19 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ children }) => {
   const pathname = usePathname();
   const router = useRouter();
-  const { profile } = useGame();
+  const { profile, userId, isLoading } = useGame();
   const [mounted, setMounted] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!isLoading && !userId && pathname !== "/" && pathname !== "/auth/callback") {
+      router.push("/");
+    }
+  }, [userId, isLoading, pathname, router]);
 
   const navItems = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },

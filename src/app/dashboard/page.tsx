@@ -102,7 +102,7 @@ export default function DashboardPage() {
     router.push(`/twin?autoquery=${prompt}`);
   };
 
-  if (!mounted) {
+  if (!mounted || !profile) {
     return (
       <div className="flex-1 flex flex-col bg-[#0A0F0A] text-white">
         <div className="flex-grow flex items-center justify-center min-h-[400px]">

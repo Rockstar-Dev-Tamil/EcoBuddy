@@ -265,20 +265,20 @@ export const SupabaseService = {
     if (!this.isEnabled()) return [];
     try {
       const { data, error } = await supabase!
-        .from("leaderboards")
-        .select("*")
+        .from("profiles")
+        .select("id, username, xp, green_score")
         .order("xp", { ascending: false })
         .limit(20);
 
       if (error) throw error;
       
       return data.map((item: any, idx: number) => ({
-        profile_id: item.profile_id,
+        profile_id: item.id,
         username: item.username,
         xp: item.xp,
         green_score: item.green_score,
         rank: idx + 1,
-        rank_movement: item.rank_movement || 0,
+        rank_movement: 0,
       }));
     } catch (e: any) {
       console.error("Error in Supabase getLeaderboard:", e?.message || e?.details || e);
