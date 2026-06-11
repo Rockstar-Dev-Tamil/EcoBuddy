@@ -161,6 +161,7 @@ export default function ProfilePage() {
                       type="file"
                       accept="image/*"
                       onChange={handleAvatarFileChange}
+                      aria-label="Upload Avatar Image"
                       className="hidden"
                     />
                   </label>
@@ -173,8 +174,9 @@ export default function ProfilePage() {
 
               {/* Username Input */}
               <div className="flex flex-col gap-1.5 mt-2">
-                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Username</label>
+                <label htmlFor="profile-username-input" className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Username</label>
                 <input
+                  id="profile-username-input"
                   type="text"
                   required
                   value={username}

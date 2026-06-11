@@ -136,6 +136,7 @@ export const Navbar: React.FC<NavbarProps> = ({ children }) => {
                   key={item.href}
                   href={item.href}
                   id={`sidebar-link-${item.name.toLowerCase().replace(" ", "-")}`}
+                  aria-current={isActive ? "page" : undefined}
                   className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all duration-300 group ${
                     isActive 
                       ? "bg-accent/10 text-accent border border-accent/20" 
@@ -173,6 +174,7 @@ export const Navbar: React.FC<NavbarProps> = ({ children }) => {
 
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
+            aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             className="w-full py-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-zinc-400 hover:text-white flex items-center justify-center cursor-pointer transition-all duration-300"
           >
             {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
@@ -253,10 +255,12 @@ export const Navbar: React.FC<NavbarProps> = ({ children }) => {
             <Link 
               key={item.href} 
               href={item.href} 
+              aria-label={item.name}
+              aria-current={isActive ? "page" : undefined}
               className="flex flex-col items-center gap-1 p-2 rounded-full relative transition-all duration-300"
               style={{ color: isActive ? "#00e676" : "rgba(244, 251, 244, 0.6)" }}
             >
-              <Icon className="w-5 h-5" />
+              <Icon className="w-5 h-5" aria-hidden="true" />
             </Link>
           );
         })}

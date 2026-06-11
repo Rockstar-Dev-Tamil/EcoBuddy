@@ -392,8 +392,9 @@ export default function CommunityPage() {
                     className="glass-panel p-5 rounded-2xl border border-white/5 flex flex-col sm:flex-row gap-4 items-end overflow-hidden bg-zinc-950/20"
                   >
                     <div className="flex-1 flex flex-col gap-1.5">
-                      <label className="text-[9px] font-extrabold text-zinc-500 uppercase tracking-widest">Village Name</label>
+                      <label htmlFor="community-village-name" className="text-[9px] font-extrabold text-zinc-500 uppercase tracking-widest">Village Name</label>
                       <input
+                        id="community-village-name"
                         type="text"
                         required
                         value={newGroupName}
@@ -404,8 +405,9 @@ export default function CommunityPage() {
                     </div>
 
                     <div className="w-full sm:w-44 flex flex-col gap-1.5">
-                      <label className="text-[9px] font-extrabold text-zinc-500 uppercase tracking-widest">Archetype Biome</label>
+                      <label htmlFor="community-archetype-biome" className="text-[9px] font-extrabold text-zinc-500 uppercase tracking-widest">Archetype Biome</label>
                       <select
+                        id="community-archetype-biome"
                         value={newGroupType}
                         onChange={(e) => setNewGroupType(e.target.value)}
                         className="w-full px-4 py-2.5 rounded-xl bg-zinc-950/45 border border-zinc-800 text-xs text-white focus:outline-none"

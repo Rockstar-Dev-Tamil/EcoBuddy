@@ -267,9 +267,13 @@ export default function DashboardPage() {
             </div>
 
             {/* Toggle view controllers */}
-            <div className="flex bg-zinc-950/60 p-1 rounded-lg border border-zinc-800 self-start sm:self-center shrink-0">
+            <div className="flex bg-zinc-950/60 p-1 rounded-lg border border-zinc-800 self-start sm:self-center shrink-0" role="tablist" aria-label="Ledger View">
               <button
                 onClick={() => setActiveTab("chart")}
+                role="tab"
+                aria-selected={activeTab === "chart"}
+                aria-controls="tab-panel-chart"
+                id="tab-btn-chart"
                 className={`px-3 py-1 rounded-md text-[10px] font-bold font-syne uppercase tracking-wider transition-colors cursor-pointer ${
                   activeTab === "chart" ? "bg-accent text-black" : "text-zinc-400 hover:text-white"
                 }`}
@@ -278,6 +282,10 @@ export default function DashboardPage() {
               </button>
               <button
                 onClick={() => setActiveTab("activity")}
+                role="tab"
+                aria-selected={activeTab === "activity"}
+                aria-controls="tab-panel-activity"
+                id="tab-btn-activity"
                 className={`px-3 py-1 rounded-md text-[10px] font-bold font-syne uppercase tracking-wider transition-colors cursor-pointer ${
                   activeTab === "activity" ? "bg-accent text-black" : "text-zinc-400 hover:text-white"
                 }`}
@@ -417,7 +425,13 @@ export default function DashboardPage() {
               <span className="text-2xl font-outfit font-extrabold text-white">Level {profile.level}</span>
               <span className="text-[10px] text-zinc-400 font-semibold font-syne uppercase">({getLevelName(profile.level)})</span>
             </div>
-            <div className="w-full bg-zinc-800/80 h-1.5 rounded-full overflow-hidden mt-2">
+            <div className="w-full bg-zinc-800/80 h-1.5 rounded-full overflow-hidden mt-2"
+              role="progressbar"
+              aria-valuenow={profile.xp % 1000}
+              aria-valuemin={0}
+              aria-valuemax={1000}
+              aria-label={`XP Progress: ${profile.xp % 1000} of 1000`}
+            >
               <div 
                 className="h-full bg-gradient-to-r from-accent to-secondary rounded-full transition-all duration-500" 
                 style={{ width: `${xpProgress}%` }}
@@ -657,6 +671,7 @@ export default function DashboardPage() {
                   key={idx}
                   onClick={() => handleQuickLog(ql)}
                   disabled={isLoggingAction !== null}
+                  aria-label={`Log ${ql.name}: ${ql.desc}. Earns ${ql.xp} XP and offsets ${ql.offset}kg CO2`}
                   className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 hover:border-accent/30 hover:bg-accent-dim/10 text-left transition-all duration-300 flex flex-col justify-between items-start gap-4 group cursor-pointer disabled:opacity-50"
                 >
                   <div className="flex justify-between items-start w-full">

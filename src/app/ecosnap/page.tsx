@@ -257,12 +257,13 @@ export default function EcoSnapPage() {
                   accept="image/*"
                   onChange={handleFileChange}
                   id="file-upload-input"
+                  aria-label="Upload sustainability receipt, meal, product label, or utility bill"
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 />
 
                 {selectedImage ? (
                   <div className="relative w-full h-full rounded-xl overflow-hidden bg-black flex items-center justify-center">
-                    <img src={selectedImage} alt="Preview" className="w-full h-full object-cover opacity-75" />
+                  <img src={selectedImage} alt={`Preview of uploaded file: ${fileName}`} className="w-full h-full object-cover opacity-75" />
                     
                     {/* Glowing Laser Scan beam */}
                     {isScanning && (
@@ -337,6 +338,7 @@ export default function EcoSnapPage() {
                 onClick={handleScan}
                 disabled={isScanning}
                 id="btn-scan-action"
+                aria-label={isScanning ? "Scanning image, please wait" : "Trigger AI Vision Analysis on uploaded image"}
                 className="w-full mt-6 py-3.5 bg-accent hover:bg-accent-bright text-black font-syne font-bold rounded-full text-xs flex items-center justify-center gap-2 shadow-lg hover:shadow-accent/20 cursor-pointer disabled:opacity-50 hover:scale-[1.01] transition-all"
               >
                 {isScanning ? (
@@ -466,6 +468,7 @@ export default function EcoSnapPage() {
                   onClick={handleLogToLedger}
                   disabled={isLogged}
                   id="btn-log-action"
+                  aria-label={isLogged ? "Action already logged to your ledger" : "Log this sustainability action and earn XP"}
                   className={`w-full py-3.5 rounded-full font-syne font-bold text-xs flex items-center justify-center gap-2 border transition-all duration-300 cursor-pointer ${
                     isLogged
                       ? "bg-emerald-500/10 border-emerald-500/30 text-accent"

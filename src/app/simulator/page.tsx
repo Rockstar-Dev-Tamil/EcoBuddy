@@ -184,6 +184,7 @@ export default function SimulatorPage() {
                 if (activeYear >= 2050) setActiveYear(2026);
                 setIsPlaying(!isPlaying);
               }}
+              aria-label={isPlaying ? "Pause climate simulation" : activeYear >= 2050 ? "Restart climate simulation" : "Play climate simulation"}
               className={`px-4.5 py-2 rounded-full border text-xs font-bold font-syne transition-all duration-300 cursor-pointer flex items-center gap-1.5 ${
                 isPlaying
                   ? "bg-accent/15 border-accent/40 text-accent animate-pulse"
@@ -239,6 +240,7 @@ export default function SimulatorPage() {
                 setActiveYear(parseInt(e.target.value));
               }}
               id="simulator-timeline-slider"
+              aria-label="Simulation Timeline Year Selector"
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
             />
             

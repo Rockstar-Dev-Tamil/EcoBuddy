@@ -375,6 +375,7 @@ function TwinChatClient() {
             <button
               onClick={handleClearChatHistory}
               id="btn-clear-chat"
+              aria-label="Clear all chat history with Sprig"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/25 transition-all duration-300 cursor-pointer"
               title="Clear Chat History"
             >
@@ -515,6 +516,7 @@ function TwinChatClient() {
                 onKeyDown={handleKeyPress}
                 placeholder="Ask Sprig (e.g. 'Should I order burgers or cook at home tonight?')"
                 id="chat-input-field"
+                aria-label="Message your AI twin Sprig"
                 className="w-full pl-5 pr-14 py-4 rounded-full bg-white/[0.03] backdrop-blur-md text-sm border border-white/10 text-white placeholder-zinc-500 focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/40 transition-colors"
                 disabled={isSending}
               />
@@ -522,6 +524,7 @@ function TwinChatClient() {
                 onClick={() => handleSendMessage(inputMessage)}
                 disabled={!inputMessage.trim() || isSending}
                 id="chat-send-button"
+                aria-label={isSending ? "Sending message" : "Send message to Sprig"}
                 className={`absolute right-2 p-3 rounded-full text-black transition-all duration-300 flex items-center justify-center cursor-pointer ${
                   inputMessage.trim() && !isSending
                     ? "bg-gradient-to-r from-accent to-secondary hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(0,230,118,0.25)]"
