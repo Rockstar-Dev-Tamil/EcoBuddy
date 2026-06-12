@@ -23,7 +23,7 @@ describe("Google Cloud Vision API Helper Logic", () => {
   describe("heuristicParseOCR", () => {
     it("correctly identifies energy category from electric keyword in OCR text", () => {
       const ocr = "DUKE ENERGY CHARLOTTE NC\nTOTAL ELECTRIC POWER BILL: 120.5 kWh\nCUSTOMER CHARGES 24.50";
-      const result = heuristicParseOCR(ocr, ["utility", "bill"], "bill.jpg");
+      const result = heuristicParseOCR(ocr);
       
       expect(result.scannedType).toBe("energy");
       expect(result.summaryDescription).toBe("Utility Bill (OCR)");
@@ -34,7 +34,7 @@ describe("Google Cloud Vision API Helper Logic", () => {
 
     it("correctly identifies waste category from store receipt in OCR text", () => {
       const ocr = "WALMART SUPERMARKET RECEIPT\n1x ECO BAG 0.50\n2x WATER BOTTLE 1.20\nTOTAL $1.70";
-      const result = heuristicParseOCR(ocr, ["receipt"], "receipt.png");
+      const result = heuristicParseOCR(ocr);
       
       expect(result.scannedType).toBe("waste");
       expect(result.summaryDescription).toBe("Shopping Receipt (OCR)");
@@ -42,7 +42,7 @@ describe("Google Cloud Vision API Helper Logic", () => {
 
     it("falls back to diet category for generic items", () => {
       const ocr = "ORGANIC SALAD MIX\n100% VEGAN INGREDIENTS";
-      const result = heuristicParseOCR(ocr, ["food"], "salad.png");
+      const result = heuristicParseOCR(ocr);
       
       expect(result.scannedType).toBe("diet");
       expect(result.summaryDescription).toBe("Scanned Item (OCR parse)");
