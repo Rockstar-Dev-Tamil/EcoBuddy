@@ -184,8 +184,7 @@ export default function LandingPage() {
             data: isSignUp ? {
               username: username.trim(),
               full_name: username.trim()
-            } : undefined,
-            emailRedirectTo: `${window.location.origin}/auth/callback`
+            } : undefined
           }
         });
 
