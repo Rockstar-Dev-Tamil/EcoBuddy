@@ -13,7 +13,6 @@ import {
   calculatePlanetUpdates,
   classifyDetectiveSeverity,
   aggregateCategoryTotals,
-  getLevelName as getLevelNameUtil,
 } from "@/lib/carbon-utils";
 
 export interface DetectiveFinding {
@@ -326,6 +325,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     return aiMsg;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, chats, loadSupabaseData, refreshAll]);
 
   const clearChatHistory = useCallback(async () => {

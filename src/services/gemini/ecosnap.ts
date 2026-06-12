@@ -2,7 +2,7 @@ export class GeminiEcoSnapService {
   /**
    * Scans an image to analyze its environmental impact.
    */
-  static async scanImage(imageBase64: string, filename: string): Promise<any> {
+  static async scanImage(imageBase64: string, filename: string): Promise<Record<string, unknown>> {
     const response = await fetch("/api/scan", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

@@ -1,105 +1,27 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Compass, 
   Calendar, 
-  Thermometer, 
-  Wind, 
-  Trees, 
-  Waves,
   Play,
   Pause,
   AlertTriangle,
   CheckCircle,
-  HelpCircle
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 
-// Mini Sprig mascot drawing for narration
-const MiniSprig: React.FC = () => {
-  return (
-    <div className="w-14 h-14 shrink-0 relative flex items-center justify-center select-none bg-emerald-500/10 border border-emerald-500/20 rounded-full">
-      <svg viewBox="0 0 100 100" className="w-10 h-10 drop-shadow-md">
-        <defs>
-          <linearGradient id="miniBodySim" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#4ade80" />
-            <stop offset="100%" stopColor="#15803d" />
-          </linearGradient>
-        </defs>
-        <path d="M 35,35 C 25,25 20,28 15,35 Z" fill="#22c55e" />
-        <path d="M 65,35 C 75,25 80,28 85,35 Z" fill="#22c55e" />
-        <ellipse cx="50" cy="65" rx="20" ry="24" fill="url(#miniBodySim)" />
-        <circle cx="50" cy="42" r="18" fill="url(#miniBodySim)" />
-        <circle cx="43" cy="38" r="2" fill="#ffffff" />
-        <circle cx="57" cy="38" r="2" fill="#ffffff" />
-        <path d="M 46,45 Q 50,49 54,45" fill="none" stroke="#14532d" strokeWidth="1" />
-        <circle cx="50" cy="20" r="3" fill="#f472b6" />
-      </svg>
-    </div>
-  );
-};
-
-// 1. Wavy Water component for Sea Levels card
-const WavyWater: React.FC<{ heightPercent: number; colorClass: string }> = ({ heightPercent, colorClass }) => {
-  return (
-    <div className="absolute inset-x-0 bottom-0 overflow-hidden rounded-b-xl" style={{ height: `${heightPercent}%` }}>
-      <svg viewBox="0 0 100 20" className="w-full h-8 absolute top-0 -mt-3.5 fill-current fill-zinc-200" style={{ color: colorClass }}>
-        <path d="M 0 10 Q 25 15, 50 10 T 100 10 L 100 20 L 0 20 Z">
-          <animate attributeName="d" dur="3s" repeatCount="indefinite"
-            values="
-              M 0 10 Q 25 15, 50 10 T 100 10 L 100 20 L 0 20 Z;
-              M 0 10 Q 25 5, 50 10 T 100 10 L 100 20 L 0 20 Z;
-              M 0 10 Q 25 15, 50 10 T 100 10 L 100 20 L 0 20 Z
-            "
-          />
-        </path>
-      </svg>
-      <div className="w-full h-full" style={{ backgroundColor: colorClass }} />
-    </div>
-  );
-};
-
-// 2. Thermometer fill component
-const ThermometerFill: React.FC<{ fillPercent: number; colorClass: string }> = ({ fillPercent, colorClass }) => {
-  return (
-    <div className="w-4 h-28 bg-zinc-800 rounded-full relative overflow-hidden border border-white/5 shrink-0">
-      <div 
-        className="absolute bottom-0 w-full rounded-full transition-all duration-700 ease-out" 
-        style={{ height: `${fillPercent}%`, backgroundColor: colorClass }}
-      />
-    </div>
-  );
-};
-
-// 3. Tree cluster grid
-const TreesGrid: React.FC<{ count: number; color: string }> = ({ count, color }) => {
-  return (
-    <div className="grid grid-cols-4 gap-2 justify-center py-2 shrink-0">
-      {[...Array(8)].map((_, i) => (
-        <span 
-          key={i} 
-          className="text-lg transition-all duration-500"
-          style={{ 
-            opacity: i < count ? 1 : 0.15,
-            transform: i < count ? "scale(1.05)" : "scale(0.8)",
-            filter: i < count ? `drop-shadow(0 2px 4px ${color}33)` : "none"
-          }}
-        >
-          🌲
-        </span>
-      ))}
-    </div>
-  );
-};
-
+import { MiniSprig } from "./components/MiniSprig";
+import { WavyWater } from "./components/WavyWater";
+import { ThermometerFill } from "./components/ThermometerFill";
+import { TreesGrid } from "./components/TreesGrid";
+import { useClimateMetrics } from "./hooks/useClimateMetrics";
 export default function SimulatorPage() {
   const [activeYear, setActiveYear] = useState<number>(2026);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
   // Auto play simulator timeline
   useEffect(() => {
-    let interval: any = null;
+    let interval: ReturnType<typeof setInterval> | null = null;
     if (isPlaying) {
       interval = setInterval(() => {
         setActiveYear((prev) => {
@@ -117,47 +39,7 @@ export default function SimulatorPage() {
   }, [isPlaying]);
 
   // Dynamic calculations based on year selection (2026 to 2050)
-  const metrics = useMemo(() => {
-    const progress = (activeYear - 2026) / (2050 - 2026); // 0 to 1
-
-    // BAU path data bounds
-    const bauTemp = (0.2 + progress * 2.6).toFixed(1);
-    const bauAqi = Math.round(55 + progress * 165);
-    const bauForest = Math.round(31 - progress * 10);
-    const bauSea = Math.round(progress * 28);
-
-    // Eco path data bounds
-    const ecoTemp = (0.2 + progress * 0.8).toFixed(1);
-    const ecoAqi = Math.round(55 - progress * 15);
-    const ecoForest = Math.round(31 + progress * 8);
-    const ecoSea = Math.round(progress * 8);
-
-    return {
-      progress,
-      bau: {
-        temp: parseFloat(bauTemp),
-        aqi: bauAqi,
-        forest: bauForest,
-        seaLevel: bauSea,
-        tempPercent: Math.min(100, Math.max(10, (parseFloat(bauTemp) / 3.5) * 100)),
-        aqiPercent: Math.min(100, (bauAqi / 300) * 100),
-        forestCount: Math.round((bauForest / 40) * 8),
-        seaPercent: Math.min(95, Math.max(15, (bauSea / 35) * 100)),
-        narration: `Under Business-As-Usual (BAU), high emissions drive temperatures up by +${bauTemp}°C. Smog increases local AQI to ${bauAqi} (poor), causing deforestation to drop to ${bauForest}% and pushing sea levels up by +${bauSea}cm.`
-      },
-      eco: {
-        temp: parseFloat(ecoTemp),
-        aqi: ecoAqi,
-        forest: ecoForest,
-        seaLevel: ecoSea,
-        tempPercent: Math.min(100, Math.max(10, (parseFloat(ecoTemp) / 3.5) * 100)),
-        aqiPercent: Math.min(100, (ecoAqi / 300) * 100),
-        forestCount: Math.round((ecoForest / 40) * 8),
-        seaPercent: Math.min(95, Math.max(15, (ecoSea / 35) * 100)),
-        narration: `With global offset logs, warming is capped at +${ecoTemp}°C. AQI clears to ${ecoAqi} (excellent), regional forests grow to ${ecoForest}%, and sea rise is limited to +${ecoSea}cm.`
-      }
-    };
-  }, [activeYear]);
+  const metrics = useClimateMetrics(activeYear);
 
   const progressPercent = ((activeYear - 2026) / (2050 - 2026)) * 100;
 
@@ -413,7 +295,7 @@ export default function SimulatorPage() {
         <div className="glass-panel p-5 rounded-2xl border border-white/5 bg-white/[0.02] flex gap-4.5 items-start mt-2">
           <MiniSprig />
           <div className="flex-1 text-xs text-zinc-300 leading-relaxed bg-zinc-950/45 border border-white/5 p-4 rounded-xl">
-            <span className="font-syne font-bold text-accent block mb-1">Sprig's Simulator Narration</span>
+            <span className="font-syne font-bold text-accent block mb-1">Sprig&apos;s Simulator Narration</span>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
               <p className="border-r border-white/5 pr-4">
                 <strong className="text-red-400 block mb-0.5">BAU Path:</strong>

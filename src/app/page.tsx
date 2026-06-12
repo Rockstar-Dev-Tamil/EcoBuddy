@@ -792,7 +792,6 @@ export default function LandingPage() {
                       vegetation={0.8}
                       rivers={0.7}
                       wildlife={0.65}
-                      atmosphereClarity={0.85}
                       pollution={0.12}
                       desertification={0.15}
                       autoRotate={true}

@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -15,10 +16,9 @@ import {
   Leaf, 
   ChevronLeft, 
   ChevronRight, 
-  User, 
+  
   LogOut 
 } from "lucide-react";
-import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { SupabaseService } from "@/services/supabase-service";
 
@@ -35,6 +35,7 @@ export const Navbar: React.FC<NavbarProps> = ({ children }) => {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -62,7 +63,7 @@ export const Navbar: React.FC<NavbarProps> = ({ children }) => {
   };
 
   const xpProgress = profile ? (profile.xp % 1000) / 10 : 0;
-  const xpNeeded = profile ? 1000 - (profile.xp % 1000) : 1000;
+  // const xpNeeded = profile ? 1000 - (profile.xp % 1000) : 1000;
 
   // Breadcrumbs parsing
   const getBreadcrumbs = () => {

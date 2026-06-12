@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useGame } from "@/stores/game-store";
-import { getLevelName, calculateXPLevel } from "@/lib/carbon-utils";
+import { calculateXPLevel } from "@/lib/carbon-utils";
 import { 
   Flame, 
   Leaf, 
@@ -142,7 +142,7 @@ export default function DashboardPage() {
   };
 
   // XP / level metrics — use carbon-utils helper
-  const { xpInLevel, xpToNext, progressPercent: xpProgressPct } = calculateXPLevel(profile.xp);
+  const { xpToNext, progressPercent: xpProgressPct } = calculateXPLevel(profile.xp);
   const xpProgress = xpProgressPct;
   const xpRemaining = xpToNext;
 

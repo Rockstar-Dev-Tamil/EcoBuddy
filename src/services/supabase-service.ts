@@ -1,6 +1,6 @@
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import { Profile, PlanetState, SustainabilityLog, DailyChallenge, Achievement, LeaderboardEntry, ChatMessage, Group } from "@/types";
-import { ProfileSchema, PlanetStateSchema, SustainabilityLogSchema, ChatMessageSchema } from "@/types/schemas";
+import { Profile, PlanetState, SustainabilityLog, LeaderboardEntry, ChatMessage } from "@/types";
+import { ProfileSchema, PlanetStateSchema, } from "@/types/schemas";
 
 export const SupabaseService = {
   /**
@@ -58,8 +58,8 @@ export const SupabaseService = {
 
       if (error) throw error;
       return ProfileSchema.parse(data) as Profile;
-    } catch (e: any) {
-      console.error("Error in Supabase getProfile:", e?.message || e?.details || e);
+    } catch (e) {
+      console.error("Error in Supabase getProfile:", e instanceof Error ? e.message : String(e));
       return null;
     }
   },
@@ -79,8 +79,8 @@ export const SupabaseService = {
 
       if (error) throw error;
       return data as Profile;
-    } catch (e: any) {
-      console.error("Error in Supabase updateProfile:", e?.message || e?.details || e);
+    } catch (e) {
+      console.error("Error in Supabase updateProfile:", e instanceof Error ? e.message : String(e));
       return null;
     }
   },
@@ -109,8 +109,8 @@ export const SupabaseService = {
 
       if (error) throw error;
       return data as PlanetState;
-    } catch (e: any) {
-      console.error("Error seeding planet state:", e?.message || e?.details || e);
+    } catch (e) {
+      console.error("Error seeding planet state:", e instanceof Error ? e.message : String(e));
       return null;
     }
   },
@@ -134,8 +134,8 @@ export const SupabaseService = {
 
       if (error) throw error;
       return PlanetStateSchema.parse(data) as PlanetState;
-    } catch (e: any) {
-      console.error("Error in Supabase getPlanetState:", e?.message || e?.details || e);
+    } catch (e) {
+      console.error("Error in Supabase getPlanetState:", e instanceof Error ? e.message : String(e));
       return null;
     }
   },
@@ -155,8 +155,8 @@ export const SupabaseService = {
 
       if (error) throw error;
       return data as PlanetState;
-    } catch (e: any) {
-      console.error("Error in Supabase updatePlanetState:", e?.message || e?.details || e);
+    } catch (e) {
+      console.error("Error in Supabase updatePlanetState:", e instanceof Error ? e.message : String(e));
       return null;
     }
   },
@@ -175,8 +175,8 @@ export const SupabaseService = {
 
       if (error) throw error;
       return data as SustainabilityLog[];
-    } catch (e: any) {
-      console.error("Error in Supabase getLogs:", e?.message || e?.details || e);
+    } catch (e) {
+      console.error("Error in Supabase getLogs:", e instanceof Error ? e.message : String(e));
       return [];
     }
   },
@@ -195,8 +195,8 @@ export const SupabaseService = {
 
       if (error) throw error;
       return data as SustainabilityLog;
-    } catch (e: any) {
-      console.error("Error in Supabase addLog:", e?.message || e?.details || e);
+    } catch (e) {
+      console.error("Error in Supabase addLog:", e instanceof Error ? e.message : String(e));
       return null;
     }
   },
@@ -215,8 +215,8 @@ export const SupabaseService = {
 
       if (error) throw error;
       return data as ChatMessage[];
-    } catch (e: any) {
-      console.error("Error in Supabase getChats:", e?.message || e?.details || e);
+    } catch (e) {
+      console.error("Error in Supabase getChats:", e instanceof Error ? e.message : String(e));
       return [];
     }
   },
@@ -235,8 +235,8 @@ export const SupabaseService = {
 
       if (error) throw error;
       return data as ChatMessage;
-    } catch (e: any) {
-      console.error("Error in Supabase addChat:", e?.message || e?.details || e);
+    } catch (e) {
+      console.error("Error in Supabase addChat:", e instanceof Error ? e.message : String(e));
       return null;
     }
   },
@@ -253,8 +253,8 @@ export const SupabaseService = {
         .eq("profile_id", userId);
 
       return !error;
-    } catch (e: any) {
-      console.error("Error in Supabase clearChat:", e?.message || e?.details || e);
+    } catch (e) {
+      console.error("Error in Supabase clearChat:", e instanceof Error ? e.message : String(e));
       return false;
     }
   },
@@ -274,15 +274,15 @@ export const SupabaseService = {
       if (error) throw error;
       
       return data.map((item: any, idx: number) => ({
-        profile_id: item.id,
-        username: item.username,
-        xp: item.xp,
-        green_score: item.green_score,
+        profile_id: String(item.id),
+        username: String(item.username),
+        xp: Number(item.xp),
+        green_score: Number(item.green_score),
         rank: idx + 1,
-        rank_movement: 0,
+        rank_movement: 0
       }));
-    } catch (e: any) {
-      console.error("Error in Supabase getLeaderboard:", e?.message || e?.details || e);
+    } catch (e) {
+      console.error("Error in Supabase getLeaderboard:", e instanceof Error ? e.message : String(e));
       return [];
     }
   }

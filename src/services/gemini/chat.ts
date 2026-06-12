@@ -4,7 +4,7 @@ export class GeminiChatService {
   /**
    * Sends a message to the AI Twin and returns the reply.
    */
-  static async sendMessage(message: string, history: ChatMessage[], context?: any): Promise<string> {
+  static async sendMessage(message: string, history: ChatMessage[], context?: Record<string, unknown>): Promise<string> {
     try {
       const response = await fetch("/api/chat", {
         method: "POST",

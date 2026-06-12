@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import DashboardPage from "@/app/dashboard/page";
 
@@ -27,8 +27,8 @@ vi.mock("@/stores/game-store", () => ({
 
 // Mock ResizeObserver and charts
 vi.mock("recharts", () => ({
-  ResponsiveContainer: ({ children }: any) => <div>{children}</div>,
-  BarChart: ({ children }: any) => <div>{children}</div>,
+  ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  BarChart: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   Bar: () => <div />,
   Cell: () => <div />,
   XAxis: () => <div />,

@@ -1,189 +1,87 @@
-# 🌿 EcoBuddy AI
+# 🌱 EcoBuddy AI - Carbon Footprint Awareness Platform
 
-> **See the future you're creating — and build a greener one.**
+[![CI](https://github.com/your-username/ecobuddy/actions/workflows/ci.yml/badge.svg)](https://github.com/your-username/ecobuddy/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-EcoBuddy AI is an intelligent carbon footprint awareness platform that transforms sustainability from dry statistics into an engaging and personalized experience. Instead of simply showing emission numbers, EcoBuddy AI helps users understand, track, and reduce their environmental impact through AI-powered guidance, computer vision, gamification, and immersive visualizations.
+> **See the future you're creating — and build a greener one.** A web app that helps individuals
+> **understand, track, and reduce** their personal carbon footprint through
+> simple inputs, gamification, and **personalized, AI-generated insights**.
 
----
+Built as a single, accessible web application: a **Supabase (PostgreSQL)** backend and
+a **React + TypeScript (Next.js)** frontend, using **Google Gemini Pro / Vision** for
+personalized advice and image analysis, deployed to **Vercel**.
 
-# 📌 Chosen Vertical
+## 🔗 Live demo
 
-### Sustainability & Climate Awareness
+**<https://ecobuddy-ai.vercel.app>** *(Placeholder Link)*
 
-EcoBuddy AI addresses the challenge of helping individuals understand, track, and reduce their carbon footprint through simple actions and personalized insights.
-
-The platform aims to make sustainability accessible, engaging, and rewarding by converting everyday habits into meaningful environmental progress.
-
----
-
-# 💡 Approach and Logic
-
-Most carbon footprint trackers rely on numerical dashboards and manual logging, which often leads to poor engagement and low retention.
-
-Our approach focuses on:
-
-* **Personalization** instead of generic advice.
-* **Behavior change** instead of static metrics.
-* **Visual feedback** instead of abstract numbers.
-* **Gamification** to encourage long-term habits.
-* **Artificial intelligence** to provide contextual and actionable recommendations.
-
-EcoBuddy AI combines the power of Gemini and Supabase to create a digital sustainability companion that evolves alongside the user.
+> Running on Vercel with live Gemini insights and Supabase-backed tracking.
 
 ---
 
-# ⚙️ How the Solution Works
+## 1. Chosen vertical
 
-## 1. AI Sustainability Twin (Sprig 🌿)
+**Sustainability & Climate Awareness** — a tool for everyday individuals who want to understand their emissions and what to actually *do* about them. The product is organised around the three core pillars:
 
-Sprig is a plant-inspired AI companion powered by Gemini.
-
-It analyzes:
-
-* User conversations
-* Sustainability logs
-* Lifestyle patterns
-* Historical activities
-
-and provides personalized recommendations related to:
-
-* Food choices
-* Transportation
-* Energy consumption
-* Shopping habits
-* Waste management
-
-Instead of overwhelming users with numbers, Sprig explains environmental impact in a friendly and engaging way.
+| Pillar | In the product |
+| --- | --- |
+| **Understand** | Interact with **EcoSnap** to scan receipts and meals, or view the **Earth 2050 Simulator** to visually compare your Business-as-Usual impact versus a Sustainable path. |
+| **Track** | Save sustainability logs over time to your **Personalized 3D Planet**. Positive actions grow vegetation, while unsustainable behaviors lead to pollution and desertification. |
+| **Reduce** | Chat with **Sprig**, your plant-inspired AI companion, to receive context-aware, personalized recommendations for food, transport, and energy. |
 
 ---
 
-## 2. EcoSnap AI
+## 2. Approach & logic
 
-Users can upload:
-
-* Meal photos
-* Grocery receipts
-* Utility bills
-* Product labels
-
-Using Gemini Vision, EcoSnap extracts relevant information and estimates environmental impact while suggesting greener alternatives.
-
----
-
-## 3. Earth 2050 Simulator
-
-The simulator visualizes the long-term consequences of current habits.
-
-Users can compare:
-
-### Business-as-Usual Path
-
-Continuing existing habits.
-
-### Sustainable Path
-
-Adopting eco-friendly recommendations.
-
-The simulator provides an emotional understanding of how small daily actions influence future environmental conditions.
-
----
-
-## 4. Personalized 3D Planet
-
-Each user owns a dynamic virtual ecosystem.
-
-Positive habits encourage:
-
-* More vegetation
-* Cleaner atmosphere
-* Richer biodiversity
-
-Unsustainable behaviors lead to:
-
-* Pollution
-* Desertification
-* Environmental degradation
-
-The planet acts as a living representation of the user's real-world impact.
-
----
-
-## 5. Community and Gamification
-
-EcoBuddy AI promotes long-term engagement through:
-
-* XP and levels
-* Daily challenges
-* Streaks
-* Achievements
-* Community leaderboards
-
-Users are encouraged to grow together and collectively reduce environmental impact.
-
----
-
-# 🏗 Tech Stack
-
-### Frontend
-
-* Next.js 15
-* TypeScript
-* Tailwind CSS
-* Shadcn UI
-* Framer Motion
-* React Three Fiber
-* Three.js
-
-### Backend
-
-* Supabase
-* PostgreSQL
-
-### Artificial Intelligence
-
-* Gemini 2.5 Pro
-* Gemini Vision
-
-### Deployment
-
-* Vercel
-
----
-
-# 🔄 Workflow
+### The decision flow (smart, context-driven assistant)
 
 ```text
-User Input
-      ↓
-Gemini AI + Gemini Vision
-      ↓
-Carbon Analysis & Recommendations
-      ↓
-Supabase Storage
-      ↓
-Gamification System
-      ↓
-3D Planet Evolution
-      ↓
-Improved Sustainable Habits
+User inputs (logs, text chat, receipt/meal photos)
+        │
+        ▼
+EcoSnap / Sprig (Gemini Vision + Pro)  ──►  Categorized Impact & Suggestions
+        │                                          │
+        ▼                                          ▼
+Supabase Datastore                     Personalized 3D Planet
+(Tracks xp, streaks, score)             ├─ Positive: Vegetation & Clean Air
+                                        └─ Negative: Pollution & Desertification
+        │
+        ▼
+Gamification Engine  ──►  Level-ups, Daily Challenges, Leaderboard
 ```
 
+The system goes beyond dry statistics by turning everyday actions into a visual, gamified experience:
+
+1. **AI Sustainability Twin (Sprig):** Instead of overwhelming users with numbers, Sprig explains environmental impact conversationally, identifying large contributors and suggesting realistic alternatives.
+2. **Earth 2050 Simulator:** Users can toggle a timeline to see the projected long-term consequences of their current habits side-by-side with a sustainable path.
+
+### Gamified retention model
+
+Footprint awareness is useless if users don't return. EcoBuddy leverages an XP system, daily challenges, and a community leaderboard to promote long-term engagement and consistent behavioral changes.
+
 ---
 
-# 📌 Assumptions Made
+## 3. How the solution works
 
-* Users are willing to provide lifestyle information or upload images for analysis.
-* Gemini can utilize publicly available information when additional context is required.
-* Environmental impact estimates are approximate and intended for awareness rather than scientific precision.
-* Positive reinforcement and gamification improve long-term engagement.
-* Small daily behavioral changes can collectively contribute to meaningful environmental benefits.
+### Architecture
+
+```text
+Browser (Next.js, React Three Fiber)    Vercel (Serverless Functions)
+  • 3D Planet UI + Chat      ──HTTP──► Next.js API Routes
+  • Upload receipts/meals                 ├─ POST /api/chat     Sprig conversational engine
+                                          ├─ POST /api/ecosnap  Gemini Vision processing
+                                          └─ GET  /api/metrics  Fetch user history
+                                              │
+                                              ├─► Google Vertex AI (Gemini 2.5 Pro / Vision)
+                                              └─► Supabase (PostgreSQL + Auth)
+```
+
+The Next.js framework serves both the frontend application (complete with Three.js visualizations) and the backend serverless API routes. This allows for rapid iteration and simplified deployments to Vercel. 
 
 ---
 
-# 🌍 Vision
+## 4. Vision
 
 EcoBuddy AI aims to transform sustainability from a passive reporting process into an interactive and emotionally engaging journey.
-
-By combining AI, visualization, and gamification, EcoBuddy AI empowers individuals to make better choices and understand the future they are helping create.
 
 > **"See the future you're creating — and take action to build a greener one."**

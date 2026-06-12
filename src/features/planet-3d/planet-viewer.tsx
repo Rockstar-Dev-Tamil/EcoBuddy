@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react-hooks/purity */
 "use client";
 
 import React, { useRef, useMemo, Suspense } from "react";
@@ -11,7 +13,6 @@ interface PlanetViewerProps {
   vegetation: number;
   rivers: number;
   wildlife: number;
-  atmosphereClarity: number;
   pollution: number;
   desertification: number;
   cloudSpeedMultiplier?: number;
@@ -41,9 +42,7 @@ const noise3D = (x: number, y: number, z: number): number => {
 // 2. Displaced Flat-Shaded Land Core Component
 const LandCore: React.FC<{
   pollution: number;
-  desertification: number;
-  vegetation: number;
-}> = ({ pollution, desertification, vegetation }) => {
+}> = ({ pollution }) => {
   const meshRef = useRef<THREE.Mesh>(null);
 
   // Slowly rotate land core
@@ -119,7 +118,7 @@ const LandCore: React.FC<{
 };
 
 // 3. Separate Water Sphere Component
-const WaterSphere: React.FC<{ pollution: number; rivers: number }> = ({ pollution, rivers }) => {
+const WaterSphere: React.FC<{ pollution: number }> = ({ pollution }) => {
   const meshRef = useRef<THREE.Mesh>(null);
 
   // Slow water surface rotation
@@ -508,7 +507,16 @@ const OrbitingBirds: React.FC<{ count: number }> = ({ count }) => {
   );
 };
 
-const Bird: React.FC<{ birdData: any }> = ({ birdData }) => {
+interface BirdData {
+  id: number;
+  orbitSpeed: number;
+  orbitRadius: number;
+  wingFlapSpeed: number;
+  phase: number;
+  pitchPhase: number;
+}
+
+const Bird: React.FC<{ birdData: BirdData }> = ({ birdData }) => {
   const birdRef = useRef<THREE.Group>(null);
   const leftWing = useRef<THREE.Mesh>(null);
   const rightWing = useRef<THREE.Mesh>(null);
@@ -754,9 +762,8 @@ const FireflyParticles: React.FC<{ pollution: number; count: number }> = ({ poll
 // Main Canvas Render Component
 export const PlanetViewer: React.FC<PlanetViewerProps> = ({
   vegetation,
-  rivers,
+  rivers: _rivers,
   wildlife,
-  atmosphereClarity,
   pollution,
   desertification,
   cloudSpeedMultiplier = 1.0,
@@ -778,12 +785,10 @@ export const PlanetViewer: React.FC<PlanetViewerProps> = ({
         {/* Miniature displaced land core */}
         <LandCore
           pollution={pollution}
-          desertification={desertification}
-          vegetation={vegetation}
         />
 
         {/* Transparent liquid ocean boundaries */}
-        <WaterSphere pollution={pollution} rivers={rivers} />
+        <WaterSphere pollution={pollution} />
 
         {/* Forest clusters, flowers, and animals spawning on land */}
         <EnvironmentElements

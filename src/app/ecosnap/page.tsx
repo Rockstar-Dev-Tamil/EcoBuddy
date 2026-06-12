@@ -186,7 +186,7 @@ export default function EcoSnapPage() {
       clearTimeout(step4);
 
       setScanStep(5);
-      setScanResult(data);
+      setScanResult(data as unknown as ScanResult);
     } catch (err) {
       console.error(err);
       setScanStep(0);

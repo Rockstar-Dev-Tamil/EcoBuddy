@@ -7,7 +7,6 @@ import { supabase } from "@/lib/supabase";
 import { SupabaseService } from "@/services/supabase-service";
 import { MockDB } from "@/lib/mock-db";
 import { User, Camera, LogOut, Flame, Check } from "lucide-react";
-import { motion } from "framer-motion";
 
 export default function ProfilePage() {
   const router = useRouter();

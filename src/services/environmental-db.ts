@@ -192,7 +192,7 @@ export const EnvironmentalDB = {
       (k) => key.includes(k) || k.includes(key)
     );
 
-    const weightKg = weightGrams / 1000;
+    // const weightKg = weightGrams / 1000; (unused)
     let co2PerKg = 2.0; // General plastic default
     let score = 40;
 

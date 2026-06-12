@@ -189,7 +189,6 @@ export default function PlanetPage() {
               vegetation={vegetation}
               rivers={rivers}
               wildlife={wildlife}
-              atmosphereClarity={atmosphereClarity}
               pollution={pollution}
               desertification={desertification}
               cloudSpeedMultiplier={1.0}

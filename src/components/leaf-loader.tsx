@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { } from "react";
 import { motion } from "framer-motion";
 
 export const LeafLoader: React.FC = () => {
   const [particles, setParticles] = React.useState<Array<{id: number, size: number, startX: number, startY: number, endX: number, endY: number, duration: number, delay: number}>>([]);
 
   React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setParticles(Array.from({ length: 16 }).map((_, i) => ({
       id: i,
       size: Math.floor(Math.random() * 4) + 2,

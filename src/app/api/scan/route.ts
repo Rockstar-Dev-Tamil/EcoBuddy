@@ -126,7 +126,7 @@ export async function callGoogleVision(base64Data: string, accessToken: string) 
   return res.json();
 }
 
-export function heuristicParseOCR(ocrText: string, _labels: string[], _filename: string) {
+export function heuristicParseOCR(ocrText: string) {
   const ocrLower = ocrText.toLowerCase();
   let category: "diet" | "energy" | "transport" | "waste" = "diet";
   let summaryDescription = "Scanned Item (OCR parse)";
@@ -349,7 +349,7 @@ Do not wrap the response in markdown blocks or write any other text, just output
             const jsonStr = text.replace(/```json/g, "").replace(/```/g, "").trim();
             parsedData = JSON.parse(jsonStr);
           } else {
-            parsedData = heuristicParseOCR(ocrText, labels, safeFilename);
+            parsedData = heuristicParseOCR(ocrText);
           }
         }
       } catch (e) {
