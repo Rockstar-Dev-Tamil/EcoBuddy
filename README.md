@@ -42,7 +42,7 @@ The Earth 2050 Simulator visualizes how today's choices affect tomorrow's world.
 Every user owns a unique virtual 3D ecosystem (built with React Three Fiber). Positive actions grow forests, clear the air, and promote biodiversity. Unsustainable behavior dynamically causes pollution, smog, and desertification based on the user's sustainability score.
 
 ### 📊 Carbon Emission Tracker
-Track emissions across 6 core categories (Food, Transportation, Electricity, Shopping, Water, Waste) using a production-grade tracking interface featuring interactive glassmorphism widgets, smooth Framer Motion animations, and Recharts analytics.
+Track emissions across 6 core categories (Food, Transportation, Electricity, Shopping, Water, Waste) using a production-grade tracking interface. Features a premium, Apple Health-inspired glassmorphism widget with animated Recharts concentric rings, real-world metric equivalencies (like trees required to offset), and Framer Motion micro-interactions.
 
 ### 🏆 Gamification System
 Footprint awareness is useless if users don't return. EcoBuddy leverages an XP system, levels, daily challenges, and streaks to reward users for building sustainable habits.
@@ -82,6 +82,17 @@ EcoBuddy AI is engineered to be highly readable, maintainable, and resilient to 
 * **Continuous Integration:** Every push to `main` must pass a rigorous GitHub Actions pipeline featuring **80+ Vitest unit/integration tests**, strict `tsc` type-checking, aggressive ESLint linting, and a successful production build.
 
 > **Read more about our engineering standards in [docs/code-quality.md](docs/code-quality.md).**
+
+---
+
+## 📚 Deep-Dive Documentation
+
+For engineers and contributors, every technical system inside EcoBuddy AI is thoroughly documented. Explore our architecture, data schemas, and API limits below:
+
+* 🗺️ **[Next.js Route Architecture (docs/routes.md)](docs/routes.md):** Deep dive into our Server Component (RSC) vs Client boundaries, dynamic suspense loaders, and exhaustive component trees for the Dashboard, Simulator, and EcoSnap layouts.
+* 🏗️ **[Backend & Data Architecture (docs/architecture.md)](docs/architecture.md):** Learn about our Zustand global store optimizations, React Three Fiber render loops, modular Domain-Driven Design (DDD), and seamless fallback logic when Supabase is offline.
+* 🔌 **[API Documentation (docs/api.md)](docs/api.md):** Complete schemas for every serverless endpoint. Read exactly how we invoke the Gemini Vision API, execute JSON parsing, securely sanitize user inputs, and process multipart form uploads.
+* 🛡️ **[Code Quality & Validation (docs/code-quality.md)](docs/code-quality.md):** Discover how we maintain a pristine codebase using aggressive ESLint rules, 100% strict TypeScript, and an 80+ test Vitest integration suite via GitHub Actions CI/CD.
 
 ---
 

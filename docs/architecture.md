@@ -1,47 +1,61 @@
-# Architecture
+# 🏗️ Technical Architecture & System Design
 
-A single Vercel deployment serves both the Next.js API Routes and the built SPA, keeping
-deployment, origin, and operations simple. This document explains the layers
-and the reasoning behind them; see the [README](../README.md) for product
-context and deployment steps.
+EcoBuddy AI is deployed as a single, unified Vercel deployment that serves both the Next.js App Router SPA and serverless API endpoints. The architecture emphasizes modularity, graceful degradation, and high-performance WebGL rendering.
 
-## System overview
+## 🌐 1. High-Level System Overview
 
 ```text
-Browser (React + TS, Next.js)           Vercel (Serverless Environment)
-  • accessible UI + 3D Planet  ──HTTP──► Next.js API Routes
-  • Carbon Tracker Hub                    ├─ POST /api/chat      Sprig conversational engine
-  • anonymous device id (auth)            ├─ POST /api/ecosnap   Gemini Vision processing
-                                          ├─ POST /api/entries   save snapshot
-                                          ├─ GET  /api/metrics   history
-                                          └─ GET  /  (+ assets)  serves built SPA
-                                              │
-                                              ├─► Google Vertex AI (Gemini) 
-                                              └─► Supabase (PostgreSQL + Auth)
+Browser Client (React + Next.js App Router)         Vercel Serverless Platform
+  ├─ Zustand Global State                              │
+  ├─ React Three Fiber (WebGL 3D Planet)      ──HTTP──► Next.js API Routes (Node.js)
+  ├─ Framer Motion (Hardware Accel. UI)                ├─ Input Sanitization Middleware
+  └─ Recharts (Data Visualization)                     ├─ POST /api/chat     (Gemini Engine)
+                                                       ├─ POST /api/ecosnap  (Vision Engine)
+                                                       ├─ POST /api/entries  (Log Sync)
+                                                       └─ GET  /api/metrics  (Data Fetch)
+                                                           │
+                      ┌────────────────────────────────────┴─────────────────────────────┐
+                      ▼                                                                  ▼
+        Google Cloud Platform (AI Layer)                              Supabase (Data Layer)
+        ├─ Vertex AI (Gemini 2.5 Pro)                                 ├─ PostgreSQL (Relational DB)
+        ├─ Gemini Vision (Multi-modal)                                ├─ Row Level Security (RLS)
+        └─ Google Cloud Vision API (OCR)                              └─ GoTrue Auth Services
 ```
 
-## Backend layers
+---
 
-| Layer | Module(s) | Rule |
+## 🛠️ 2. Frontend Architecture (React + Next.js)
+
+### State Management (`src/stores/`)
+We avoid prop-drilling by utilizing **Zustand** (or a generic React Context Store) for global state management (`useGame`).
+- **Planet State:** Tracks parameters like `vegetation`, `pollution`, and `desertification` which are deterministically derived from the user's historical carbon offset logs.
+- **User Profile:** Tracks XP, level, and authentication status.
+
+### The Presentation Layer (`src/components/`)
+UI components strictly follow the **"Dumb Components"** pattern. They do not fetch their own data; they receive data via props or global hooks.
+- **Performance:** We utilize `React.memo` and `useMemo` heavily to prevent unnecessary re-renders of the expensive 3D planet canvas when UI layers (like chat or dashboard widgets) update.
+- **Animations:** UI transitions utilize `framer-motion` optimized for GPU acceleration (`transform` and `opacity` properties) rather than triggering browser layout recalculations.
+
+### The 3D Rendering Engine (`src/features/planet-3d/`)
+Built with **Three.js** and **React Three Fiber**.
+- **Procedural Generation:** The planet mesh modifies its shader attributes in real-time. We use Fractional Brownian Motion (fBm) 3D Noise functions mathematically evaluated in the render loop to dynamically simulate clouds, terrain, and pollution based on the `PlanetState`.
+- **Optimization:** Textures and complex models are asynchronously loaded via `<Suspense>` boundaries. We utilize `drei` helpers (`OrbitControls`, `Stars`) for performant scene management.
+
+---
+
+## ⚙️ 3. Backend Architecture (Node.js Serverless)
+
+### Layered Module Separation
+The backend follows Domain-Driven Design principles to separate concerns:
+
+| Layer | Directory | Responsibility |
 | --- | --- | --- |
-| Domain | `src/lib/` | Pure business logic, standard seed data (`mock-seed.ts`), and metric calculations without heavy I/O. |
-| Insights | `src/services/gemini/` | External AI integrations (e.g., `ecosnap.ts`). It translates image/text into actionable insights via Vertex AI/Gemini. |
-| Persistence | `src/services/` | Supabase services and mock DB fallbacks (`mock-db.ts`). Handled abstractly so the app can degrade gracefully if the remote DB is down. |
-| Transport | `src/app/api/` | Thin Next.js serverless routes. They validate input parameters and pass payloads to the services layer. |
+| **Domain Logic** | `src/lib/` | Pure business logic (`carbon-utils.ts`). Calculates exact emission factors, applies gamification math, and computes XP deltas. Free of heavy I/O operations and completely synchronistic. |
+| **AI Insights** | `src/services/` | Translates raw input (images, receipts) into structured JSON arrays by chaining Google Cloud Vision OCR results into rigid Gemini Prompts. |
+| **Persistence** | `src/services/supabase/` | Supabase bindings. Executes database CRUD operations. If Supabase is offline or disabled, it falls back to an abstract `MockDB` (`src/lib/mock-db.ts`) seamlessly. |
+| **Transport / API** | `src/app/api/` | Thin API controllers. Responsible strictly for HTTP parsing, payload validation, MIME type checking, and responding with standard HTTP status codes. |
 
-Design rules the codebase follows:
-
-- **Dependencies point inward.** UI components depend on hooks, hooks depend on services.
-- **Graceful degradation.** Both Gemini and Supabase can gracefully failover to mock equivalents for local development.
-
-## Frontend structure
-
-| Concern | Location |
-| --- | --- |
-| State + API orchestration | `src/app/simulator/hooks/` and generic React hooks |
-| Presentation | `src/components/`, `src/app/simulator/components/`, and `src/app/carbon-tracker/` |
-| Client Utilities | `src/lib/` (types, local storage wrappers, carbon calculation logic) |
-
-## Quality gates
-
-Every push to main runs linting (ESLint), type checks (`tsc --noEmit`), unit tests (`vitest`), and a full production build (`next build`) within our GitHub Actions workflow. See `.github/workflows/ci.yml`.
+### Graceful Degradation & Resilience
+EcoBuddy AI is designed to never completely "break" if a microservice fails.
+1. **AI Failure:** If Gemini API rate limits are hit (HTTP 429), the API route gracefully catches the error and executes a local `heuristicParseOCR` or deterministic mock function to return an approximate result.
+2. **Database Offline:** If Supabase connection fails, the client-side global store automatically falls back to utilizing `localStorage` and `MockDB` seed data, allowing the user to experience the App offline or in development environments.
