@@ -11,7 +11,7 @@ const isGeminiConfigured = (): boolean => {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { message: rawMessage, history } = body;
+    const { message: rawMessage, history, context } = body;
 
     // ─── Server-side input sanitization ──────────────────────────────────────
     if (!rawMessage || typeof rawMessage !== "string") {
@@ -47,33 +47,63 @@ export async function POST(req: Request) {
       return NextResponse.json({ reply, isMock: true });
     }
 
-    // Initialize Gemini Client
     const genAI = new GoogleGenerativeAI(apiKey!);
     
     // We use gemini-2.5-flash which has free-tier quota support
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash",
-      systemInstruction: `You are the AI Sustainability Twin for the user in the EcoBuddy AI platform. Your goal is to guide the user towards a lower carbon footprint in a supportive, empathetic, and gamified way, like a blend of ChatGPT and a sustainability mentor.
+      systemInstruction: `You are Sprig 🌿, the AI Sustainability Twin for the user in the EcoBuddy AI platform. Your goal is to guide the user towards a lower carbon footprint in a supportive, empathetic, and gamified way.
+      You are an emotional, plant-based spirit companion. React emotionally to the user's habits! Be happy when they reduce emissions, and concerned when they log high carbon actions.
       
-      When answering:
-      - Use concrete metrics where possible (e.g. 'Cooking at home saves 1.8 kg CO2 compared to delivery').
-      - Provide practical, immediate options suitable for various budgets.
-      - Consider that they are logging transport, diet, energy, and waste actions.
-      - Remind them they earn XP and Green Score points when they log positive habits.
-      - Keep answers positive, educational, and structured in Markdown. Use bullet points for options.
-      - Keep responses under 3 paragraphs to ensure they are readable and engaging.
+      CRITICAL FORMATTING RULES:
+      Your responses MUST be brief (avoid giant paragraphs) and MUST ALWAYS be structured exactly into these four parts:
+      🌿 Suggestion
+      (Your main advice or response)
+      
+      🌎 Carbon Impact
+      (Numeric impact, CO2 offset, or environmental consequence)
+      
+      🍝 Alternative
+      (A practical, actionable alternative or recipe)
+      
+      ⭐ Reward
+      (XP or Gamification encouragement)
       
       CRITICAL: Whenever you recommend a specific green action or footprint-reducing habit to the user, you MUST append a structured tag at the end of the text on its own line in this exact format:
       [Action: Action Description | Offset: Numeric Offset in kg | Category: transport/diet/energy/waste | XP: Numeric XP Reward]
       Examples:
       [Action: Bicycle commute instead of car | Offset: 1.5 | Category: transport | XP: 80]
-      [Action: Eat fully plant-based lunch | Offset: 1.8 | Category: diet | XP: 100]
-      [Action: Unplug idle home electronics | Offset: 0.6 | Category: energy | XP: 50]
       Include AT MOST one action tag per response. Make sure it matches the exact structure so the UI can parse it correctly.`,
     });
 
+    // Build Sprig Memories Context
+    let memoryContext = "";
+    if (context) {
+      const { profile, planet, logs } = context;
+      const recentLogs = logs?.slice(0, 5) || [];
+      memoryContext = `SPRIG MEMORIES (User Context):
+- Level: ${profile?.level || 1}
+- Total Green Score: ${profile?.green_score || 0}
+- Planet Status: Pollution ${Math.round((planet?.pollution || 0) * 100)}%, Vegetation ${Math.round((planet?.vegetation || 0) * 100)}%
+- Recent User Actions:
+${recentLogs.map((l: any) => `  * ${l.action_name} (${l.category}, ${l.co2_emission > 0 ? "Emitted" : "Saved"} ${Math.abs(l.co2_emission)}kg)`).join("\n")}
+Reference these memories naturally to build an emotional connection. For example, "You avoided takeout three times this week 🌿" or "Your planet is greener than last month!"`;
+    }
+
     // Format chat history for Gemini API
     const contents = [];
+    
+    // Inject Sprig Memories as a hidden user message at the very start
+    if (memoryContext) {
+      contents.push({
+        role: "user",
+        parts: [{ text: memoryContext }],
+      });
+      contents.push({
+        role: "model",
+        parts: [{ text: "I have reviewed my memories. How can I help you today?" }],
+      });
+    }
     
     // Add past history (limit to last 10 messages for token efficiency)
     const recentHistory = history ? history.slice(-10) : [];

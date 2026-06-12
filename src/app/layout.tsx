@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { GameProvider } from "@/stores/game-store";
 import { Navbar } from "@/components/navbar";
+import { Suspense } from "react";
+import { ErrorBoundary } from "@/components/error-boundary";
+import { LeafLoader } from "@/components/leaf-loader";
 
 export const metadata: Metadata = {
   title: "EcoBuddy AI — Your Intelligent Sustainability Companion",
@@ -33,7 +36,11 @@ export default function RootLayout({
         {/* Semantic Content Container */}
         <GameProvider>
           <Navbar>
-            {children}
+            <ErrorBoundary>
+              <Suspense fallback={<LeafLoader />}>
+                {children}
+              </Suspense>
+            </ErrorBoundary>
           </Navbar>
         </GameProvider>
       </body>

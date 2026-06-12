@@ -50,50 +50,60 @@ const parseActionTag = (text: string): { cleanText: string; action: ParsedAction
 const parseMessageIntoBlocks = (text: string): MessageBlock[] => {
   const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
   const blocks: MessageBlock[] = [];
+  
+  let currentType: MessageBlock["type"] = "text";
+  let currentContent: string[] = [];
+
+  const flush = () => {
+    if (currentContent.length > 0) {
+      let icon;
+      if (currentType === "recommendation") icon = <Leaf className="w-4 h-4 text-[#00E676] shrink-0" />;
+      else if (currentType === "impact") icon = <TrendingDown className="w-4 h-4 text-secondary shrink-0" />;
+      else if (currentType === "insight") icon = <span className="text-sm shrink-0">🍝</span>;
+      else if (currentType === "reward") icon = <Sparkles className="w-4 h-4 text-yellow-500 shrink-0" />;
+      
+      blocks.push({
+        type: currentType,
+        content: currentContent.join("\n"),
+        icon
+      });
+      currentContent = [];
+    }
+  };
 
   for (const line of lines) {
-    // Check if it is a bullet point list item
-    if (line.startsWith("-") || line.startsWith("*") || /^\d+\./.test(line)) {
-      const cleanLine = line.replace(/^[-*\d.]+\s*/, "");
-      blocks.push({ type: "bullet", content: cleanLine });
-      continue;
-    }
-
     const lower = line.toLowerCase();
     
-    // Custom structural formatting matching suggestions, impact, meal ideas, and rewards
-    if (line.includes("🌿") || lower.startsWith("suggestion:") || lower.includes("suggestion") || lower.includes("suggest:")) {
-      blocks.push({ 
-        type: "recommendation", 
-        content: line.replace(/^[🌿\s]+/, "").replace(/^suggestion:?\s*/i, "").replace(/^suggest:?\s*/i, ""), 
-        icon: <Leaf className="w-4 h-4 text-[#00E676] shrink-0" />
-      });
-    } else if (line.includes("🌎") || line.includes("🌱") || lower.includes("kg co") || lower.includes("carbon") || lower.includes("offset") || lower.includes("impact")) {
-      blocks.push({ 
-        type: "impact", 
-        content: line.replace(/^[🌎🌱\s]+/, "").replace(/^impact:?\s*/i, ""), 
-        icon: <TrendingDown className="w-4 h-4 text-secondary shrink-0" />
-      });
-    } else if (line.includes("🍝") || lower.includes("recipe") || lower.includes("meal idea") || lower.includes("cook")) {
-      blocks.push({ 
-        type: "insight", 
-        content: line.replace(/^[🍝\s]+/, "").replace(/^quick recipe:?\s*/i, "").replace(/^quick meal idea:?\s*/i, "").replace(/^meal idea:?\s*/i, ""), 
-        icon: <span className="text-sm shrink-0">🍝</span>
-      });
-    } else if (line.includes("⭐") || line.includes("🏆") || lower.includes("xp") || lower.includes("reward")) {
-      blocks.push({ 
-        type: "reward", 
-        content: line.replace(/^[⭐🏆\s]+/, "").replace(/^reward:?\s*/i, ""), 
-        icon: <Sparkles className="w-4 h-4 text-yellow-500 shrink-0" />
-      });
+    // Check for block headers (they should be relatively short lines)
+    if ((lower.includes("🌿") || lower.includes("suggestion")) && lower.length < 30 && !lower.includes("action:")) {
+      flush();
+      currentType = "recommendation";
+    } else if ((lower.includes("🌎") || lower.includes("carbon impact") || lower.includes("impact")) && lower.length < 30 && !lower.includes("action:")) {
+      flush();
+      currentType = "impact";
+    } else if ((lower.includes("🍝") || lower.includes("alternative")) && lower.length < 30 && !lower.includes("action:")) {
+      flush();
+      currentType = "insight";
+    } else if ((lower.includes("⭐") || lower.includes("reward")) && lower.length < 30 && !lower.includes("action:")) {
+      flush();
+      currentType = "reward";
+    } else if (line.startsWith("-") || line.startsWith("*") || /^\d+\./.test(line)) {
+      if (currentType === "text") {
+        flush();
+        blocks.push({ type: "bullet", content: line.replace(/^[-*\d.]+\s*/, "") });
+      } else {
+        currentContent.push(line);
+      }
     } else {
-      blocks.push({ type: "text", content: line });
+      // Strip markdown bolding from regular text for cleaner UI
+      currentContent.push(line.replace(/\*\*/g, ""));
     }
   }
+  
+  flush();
 
-  // If blocks array is empty, default back to full text
   if (blocks.length === 0) {
-    blocks.push({ type: "text", content: text });
+    blocks.push({ type: "text", content: text.replace(/\*\*/g, "") });
   }
 
   return blocks;
@@ -274,7 +284,7 @@ function TwinChatClient() {
                   {block.icon}
                   <div>
                     <span className="font-syne font-bold text-accent block mb-0.5">🌿 Suggestion</span>
-                    <p className="leading-relaxed text-zinc-200">{block.content}</p>
+                    <p className="leading-relaxed text-zinc-200 whitespace-pre-wrap">{block.content}</p>
                   </div>
                 </div>
               );
@@ -283,8 +293,8 @@ function TwinChatClient() {
                 <div key={idx} className="p-3.5 rounded-xl border border-secondary/25 bg-secondary/5 text-xs text-zinc-100 flex items-start gap-2.5 shadow-sm">
                   {block.icon}
                   <div>
-                    <span className="font-syne font-bold text-secondary block mb-0.5">🌎 Impact</span>
-                    <p className="leading-relaxed text-zinc-200">{block.content}</p>
+                    <span className="font-syne font-bold text-secondary block mb-0.5">🌎 Carbon Impact</span>
+                    <p className="leading-relaxed text-zinc-200 whitespace-pre-wrap">{block.content}</p>
                   </div>
                 </div>
               );
@@ -294,7 +304,7 @@ function TwinChatClient() {
                   {block.icon}
                   <div>
                     <span className="font-syne font-bold text-yellow-400 block mb-0.5">⭐ Reward</span>
-                    <p className="leading-relaxed text-zinc-200">{block.content}</p>
+                    <p className="leading-relaxed text-zinc-200 whitespace-pre-wrap">{block.content}</p>
                   </div>
                 </div>
               );
@@ -303,8 +313,8 @@ function TwinChatClient() {
                 <div key={idx} className="p-3.5 rounded-xl border border-white/10 bg-white/5 text-xs text-zinc-100 flex items-start gap-2.5 shadow-sm">
                   {block.icon}
                   <div>
-                    <span className="font-syne font-bold text-zinc-200 block mb-0.5">🍝 Quick Meal Idea</span>
-                    <p className="leading-relaxed text-zinc-200">{block.content}</p>
+                    <span className="font-syne font-bold text-zinc-200 block mb-0.5">🍝 Alternative</span>
+                    <p className="leading-relaxed text-zinc-200 whitespace-pre-wrap">{block.content}</p>
                   </div>
                 </div>
               );
@@ -317,7 +327,7 @@ function TwinChatClient() {
               );
             default:
               return (
-                <p key={idx} className="text-xs sm:text-sm text-zinc-200 leading-relaxed">{block.content}</p>
+                <p key={idx} className="text-xs sm:text-sm text-zinc-200 leading-relaxed whitespace-pre-wrap">{block.content}</p>
               );
           }
         })}

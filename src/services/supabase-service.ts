@@ -1,5 +1,6 @@
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import { Profile, PlanetState, SustainabilityLog, DailyChallenge, Achievement, LeaderboardEntry, ChatMessage, Group } from "@/lib/mock-db";
+import { Profile, PlanetState, SustainabilityLog, DailyChallenge, Achievement, LeaderboardEntry, ChatMessage, Group } from "@/types";
+import { ProfileSchema, PlanetStateSchema, SustainabilityLogSchema, ChatMessageSchema } from "@/types/schemas";
 
 export const SupabaseService = {
   /**
@@ -56,7 +57,7 @@ export const SupabaseService = {
       }
 
       if (error) throw error;
-      return data as Profile;
+      return ProfileSchema.parse(data) as Profile;
     } catch (e: any) {
       console.error("Error in Supabase getProfile:", e?.message || e?.details || e);
       return null;
@@ -132,7 +133,7 @@ export const SupabaseService = {
       }
 
       if (error) throw error;
-      return data as PlanetState;
+      return PlanetStateSchema.parse(data) as PlanetState;
     } catch (e: any) {
       console.error("Error in Supabase getPlanetState:", e?.message || e?.details || e);
       return null;

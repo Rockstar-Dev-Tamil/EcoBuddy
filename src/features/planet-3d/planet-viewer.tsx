@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useRef, useMemo } from "react";
+import React, { useRef, useMemo, Suspense } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
+import { ErrorBoundary } from "@/components/error-boundary";
+import { LeafLoader } from "@/components/leaf-loader";
 import { OrbitControls, Stars } from "@react-three/drei";
 import * as THREE from "three";
 
@@ -763,11 +765,13 @@ export const PlanetViewer: React.FC<PlanetViewerProps> = ({
 }) => {
   return (
     <div className="w-full h-full relative" style={{ minHeight: "400px" }}>
-      <Canvas
-        shadows
-        camera={{ position: [0, 0, 4.6], fov: 60 }}
-        gl={{ antialias: true }}
-      >
+      <ErrorBoundary>
+        <Suspense fallback={<LeafLoader />}>
+          <Canvas
+            shadows
+            camera={{ position: [0, 0, 4.6], fov: 60 }}
+            gl={{ antialias: true }}
+          >
         {/* Dynamic Sun/Moon and Shadows */}
         <DynamicSunlight isNightMode={isNightMode} />
 
@@ -812,7 +816,9 @@ export const PlanetViewer: React.FC<PlanetViewerProps> = ({
           autoRotate={autoRotate}
           autoRotateSpeed={1.2}
         />
-      </Canvas>
+          </Canvas>
+        </Suspense>
+      </ErrorBoundary>
     </div>
   );
 };

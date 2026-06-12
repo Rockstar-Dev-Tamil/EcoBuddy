@@ -6,7 +6,7 @@
  * unit-tested independently without needing to mount React components.
  */
 
-import type { PlanetState } from "@/lib/mock-db";
+import type { PlanetState } from "@/types";
 
 // ---------------------------------------------------------------------------
 // XP / Level helpers

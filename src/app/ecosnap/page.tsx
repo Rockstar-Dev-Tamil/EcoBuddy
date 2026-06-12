@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useGame } from "@/stores/game-store";
 import { Camera, FileText, Check, AlertTriangle, HelpCircle, ArrowRight, Upload, Leaf, ShieldAlert } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { GeminiEcoSnapService } from "@/services/gemini/ecosnap";
 
 interface ScanResult {
   category: "diet" | "energy" | "transport" | "waste" | string;
@@ -171,25 +172,14 @@ export default function EcoSnapPage() {
     const step4 = setTimeout(() => setScanStep(4), 2400);
 
     try {
-      const response = await fetch("/api/scan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageBase64: selectedImage, filename: fileName }),
-      });
+      const data = await GeminiEcoSnapService.scanImage(selectedImage, fileName);
 
       clearTimeout(step2);
       clearTimeout(step3);
       clearTimeout(step4);
 
-      if (response.ok) {
-        const data = await response.json();
-        setScanStep(5);
-        setScanResult(data);
-      } else {
-        const errorData = await response.json();
-        setScanStep(0);
-        throw new Error(errorData.error || "Failed to analyze scan");
-      }
+      setScanStep(5);
+      setScanResult(data);
     } catch (err: any) {
       console.error(err);
       setScanStep(0);

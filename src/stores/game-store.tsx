@@ -1,9 +1,11 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { MockDB, Profile, PlanetState, SustainabilityLog, DailyChallenge, Achievement, LeaderboardEntry, ChatMessage, Group } from "@/lib/mock-db";
+import { MockDB } from "@/lib/mock-db";
+import { Profile, PlanetState, SustainabilityLog, DailyChallenge, Achievement, LeaderboardEntry, ChatMessage, Group } from "@/types";
 import { supabase } from "@/lib/supabase";
 import { SupabaseService } from "@/services/supabase-service";
+import { GeminiChatService } from "@/services/gemini/chat";
 import {
   calculateGreenScoreDelta,
   applyGreenScore,
@@ -300,27 +302,17 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // 2. Fetch AI response (this calls the Gemini API route)
     let reply = "I am processing your query. Try reducing your daily electric consumption or opting for public transit.";
     try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, history: chats }),
+      const fallbackProfile = profile || MockDB.getProfile();
+      const fallbackPlanet = planet || MockDB.getPlanetState();
+      reply = await GeminiChatService.sendMessage(message, chats, {
+        profile: fallbackProfile,
+        planet: fallbackPlanet,
+        logs: logs.length > 0 ? logs : MockDB.getLogs(),
+        achievements,
       });
-      
-      if (response.ok) {
-        const data = await response.json();
-        reply = data.reply;
-      } else {
-        const data = await response.json();
-        throw new Error(data.error || "API Route returned an error status");
-      }
     } catch (error) {
-      console.warn("AI Chat API failed:", error);
-      const errMsg = error instanceof Error ? error.message : String(error);
-      if (errMsg.includes("connection") || errMsg.includes("Network") || errMsg.includes("fetch")) {
-        reply = "I'm sorry, my neural plant pathways are currently disconnected! 🌿 Please check your connection or try again in a few moments.";
-      } else {
-        reply = "I'm sorry, my neural plant pathways are currently overloaded! 🌿 I am experiencing high demand. Please try again shortly once my leaves have rested.";
-      }
+      console.warn("AI Chat Service failed:", error);
+      reply = "I'm sorry, my neural plant pathways are currently disconnected! 🌿 Please check your connection or try again in a few moments.";
     }
 
     // 3. Store AI response
