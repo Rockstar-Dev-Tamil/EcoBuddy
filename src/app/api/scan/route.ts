@@ -19,14 +19,14 @@ try {
   } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
     const credsPath = path.isAbsolute(process.env.GOOGLE_APPLICATION_CREDENTIALS)
       ? process.env.GOOGLE_APPLICATION_CREDENTIALS
-      : path.join(process.cwd(), process.env.GOOGLE_APPLICATION_CREDENTIALS);
+      : path.join(/*turbopackIgnore: true*/ process.cwd(), process.env.GOOGLE_APPLICATION_CREDENTIALS);
     if (fs.existsSync(credsPath)) {
       serviceAccount = JSON.parse(fs.readFileSync(credsPath, "utf8"));
     }
   }
   
   if (!serviceAccount) {
-    const defaultPath = path.join(process.cwd(), "gmp-demo-project-064136245-618edbf4f9af.json");
+    const defaultPath = path.join(/*turbopackIgnore: true*/ process.cwd(), "gmp-demo-project-064136245-618edbf4f9af.json");
     if (fs.existsSync(defaultPath)) {
       serviceAccount = JSON.parse(fs.readFileSync(defaultPath, "utf8"));
     }
@@ -300,7 +300,7 @@ export async function POST(req: Request) {
 
     if (isGoogleVisionConfigured()) {
       try {
-        const accessToken = await getGoogleAccessToken(serviceAccount);
+        const accessToken = await getGoogleAccessToken(serviceAccount as { client_email: string; private_key: string });
         const visionResult = await callGoogleVision(base64Data, accessToken);
         
         const ocrText = visionResult.responses?.[0]?.textAnnotations?.[0]?.description || "";

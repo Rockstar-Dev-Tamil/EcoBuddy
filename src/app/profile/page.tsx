@@ -150,8 +150,10 @@ export default function ProfilePage() {
                 <div className="relative group">
                   <div className="w-20 h-20 rounded-full border-2 border-zinc-700 bg-zinc-900 flex items-center justify-center font-bold text-accent text-2xl overflow-hidden shadow-inner select-none">
                     {avatarUrl ? (
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={avatarUrl} alt="User Avatar" className="w-full h-full object-cover" />
+                      <>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={avatarUrl} alt="User Avatar" className="w-full h-full object-cover" />
+                      </>
                     ) : (
                       username ? username[0].toUpperCase() : "U"
                     )}

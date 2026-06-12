@@ -149,7 +149,7 @@ Reference these memories naturally to build an emotional connection. For example
     }
 
     return NextResponse.json(
-      { error: "Failed to generate AI response: " + error.message },
+      { error: "Failed to generate AI response: " + (error instanceof Error ? error.message : String(error)) },
       { status: 500 }
     );
   }
