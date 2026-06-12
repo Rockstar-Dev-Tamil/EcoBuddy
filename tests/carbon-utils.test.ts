@@ -144,18 +144,18 @@ describe("calculatePlanetUpdates", () => {
   };
 
   it("reduces pollution and desertification for positive offset", () => {
-    const updates = calculatePlanetUpdates("transport", 2, basePlanet);
+    const updates = calculatePlanetUpdates("transportation", 2, basePlanet);
     expect(updates.pollution).toBeLessThan(basePlanet.pollution);
     expect(updates.desertification).toBeLessThan(basePlanet.desertification);
   });
 
-  it("increases atmosphere_clarity for transport category offset", () => {
-    const updates = calculatePlanetUpdates("transport", 2, basePlanet);
+  it("increases atmosphere_clarity for transportation category offset", () => {
+    const updates = calculatePlanetUpdates("transportation", 2, basePlanet);
     expect(updates.atmosphere_clarity).toBeGreaterThan(basePlanet.atmosphere_clarity);
   });
 
-  it("increases wildlife and vegetation for diet offset", () => {
-    const updates = calculatePlanetUpdates("diet", 1.5, basePlanet);
+  it("increases wildlife and vegetation for food offset", () => {
+    const updates = calculatePlanetUpdates("food", 1.5, basePlanet);
     expect(updates.wildlife).toBeGreaterThan(basePlanet.wildlife);
     expect(updates.vegetation).toBeGreaterThan(basePlanet.vegetation);
   });
@@ -166,7 +166,7 @@ describe("calculatePlanetUpdates", () => {
   });
 
   it("increases pollution and desertification for negative offset (emission)", () => {
-    const updates = calculatePlanetUpdates("transport", -3, basePlanet);
+    const updates = calculatePlanetUpdates("transportation", -3, basePlanet);
     expect(updates.pollution).toBeGreaterThan(basePlanet.pollution);
     expect(updates.desertification).toBeGreaterThan(basePlanet.desertification);
   });
@@ -210,14 +210,14 @@ describe("classifyDetectiveSeverity", () => {
 describe("aggregateCategoryTotals", () => {
   it("sums CO2 correctly per known category", () => {
     const logs = [
-      { category: "transport", co2_emission: 3.0 },
-      { category: "transport", co2_emission: 1.5 },
-      { category: "diet", co2_emission: 2.0 },
+      { category: "transportation", co2_emission: 3.0 },
+      { category: "transportation", co2_emission: 1.5 },
+      { category: "food", co2_emission: 2.0 },
     ];
     const totals = aggregateCategoryTotals(logs);
-    expect(totals.transport).toBeCloseTo(4.5);
-    expect(totals.diet).toBeCloseTo(2.0);
-    expect(totals.energy).toBe(0);
+    expect(totals.transportation).toBeCloseTo(4.5);
+    expect(totals.food).toBeCloseTo(2.0);
+    expect(totals.electricity).toBe(0);
     expect(totals.waste).toBe(0);
   });
 
@@ -229,6 +229,6 @@ describe("aggregateCategoryTotals", () => {
 
   it("returns all-zero record for an empty log array", () => {
     const totals = aggregateCategoryTotals([]);
-    expect(totals).toEqual({ transport: 0, diet: 0, energy: 0, waste: 0 });
+    expect(totals).toEqual({ food: 0, transportation: 0, electricity: 0, shopping: 0, water: 0, waste: 0 });
   });
 });

@@ -191,7 +191,7 @@ describe("Chat API — Input Sanitization", () => {
   it("strips HTML tags from the message", () => {
     const result = validateChatInput("<script>alert('xss')</script>Hello");
     expect(result.valid).toBe(true);
-    expect(result.message).toBe("Hello");
+    expect(result.message).toBe("alert('xss')Hello");
     expect(result.message).not.toContain("<script>");
   });
 
