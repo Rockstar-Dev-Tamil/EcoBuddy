@@ -4,13 +4,11 @@ import React, { useState } from "react";
 import { useGame } from "@/stores/game-store";
 import { 
   Camera, 
-  ScanLine, 
-  Leaf, 
+  FileText,
   Check, 
-  RefreshCcw, 
-  ShieldAlert, 
-  Info,
-  ChevronRight
+  HelpCircle,
+  Leaf, 
+  ShieldAlert 
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GeminiEcoSnapService } from "@/services/gemini/ecosnap";
