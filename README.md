@@ -1,106 +1,108 @@
-# 🌱 EcoBuddy AI - Carbon Footprint Awareness Platform
+# 🌱 EcoBuddy AI — AI-Powered Carbon Footprint Awareness Platform
 
 [![CI](https://github.com/your-username/ecobuddy/actions/workflows/ci.yml/badge.svg)](https://github.com/your-username/ecobuddy/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-> **See the future you're creating — and build a greener one.** A web app that helps individuals
-> **understand, track, and reduce** their personal carbon footprint through
-> simple inputs, gamification, and **personalized, AI-generated insights**.
+> ### **See the future you're creating — and build a greener one.**
+>
+> EcoBuddy AI is an intelligent sustainability companion that helps individuals **understand, track, and reduce** their personal carbon footprint through AI-powered insights, computer vision, gamification, and immersive visualizations.
 
-Built as a single, accessible web application: a **Supabase (PostgreSQL)** backend and
-a **React + TypeScript (Next.js)** frontend, using **Google Gemini Pro / Vision** for
-personalized advice and image analysis, deployed to **Vercel**.
+Built as a single, highly accessible web application utilizing **Google Gemini 2.5 Pro + Gemini Vision**, a **Supabase (PostgreSQL)** backend, and a **Next.js (React + TypeScript)** frontend. EcoBuddy AI transforms sustainability from dry statistics into an emotionally engaging journey.
 
 ## 🔗 Live demo
 
 **<https://ecobuddy-ai.vercel.app>** *(Placeholder Link)*
 
-> Running on Vercel with live Gemini insights and Supabase-backed tracking.
+---
+
+## 🌍 Why EcoBuddy AI?
+
+Climate awareness tools often overwhelm users with charts and numbers but fail to inspire long-term change. EcoBuddy AI focuses on:
+
+* 🌿 Understanding environmental impact.
+* 📈 Tracking sustainability habits over time.
+* 🎯 Encouraging positive behavior through gamification.
+* 🤖 Delivering personalized AI recommendations.
+* 🌎 Helping users visualize the future they are creating.
 
 ---
 
-## 1. Chosen vertical
+## ✨ Product Features
 
-**Sustainability & Climate Awareness** — a tool for everyday individuals who want to understand their emissions and what to actually *do* about them. The product is organised around the three core pillars:
+### 🌿 Sprig — AI Sustainability Twin
+Sprig is a plant-inspired AI companion powered by **Google Gemini 2.5 Pro**. Instead of presenting complicated statistics, Sprig communicates naturally, helping users understand daily habits, identify high-impact behaviors, and suggesting sustainable alternatives.
 
-| Pillar | In the product |
-| --- | --- |
-| **Understand** | Interact with **EcoSnap** to scan receipts and meals, or view the **Earth 2050 Simulator** to visually compare your Business-as-Usual impact versus a Sustainable path. |
-| **Track** | Save sustainability logs over time across 6 core categories (Food, Transportation, Electricity, Shopping, Water, Waste) using the interactive **Carbon Calculator**. Positive actions grow vegetation, while unsustainable behaviors lead to pollution and desertification on your **Personalized 3D Planet**. |
-| **Reduce** | Chat with **Sprig**, your plant-inspired AI companion, to receive context-aware, personalized recommendations for food, transport, and energy. |
+### 📸 EcoSnap AI
+Powered by **Gemini Vision**, EcoSnap allows users to upload meal photos, grocery receipts, utility bills, or product labels. It automatically detects objects, estimates environmental impact, generates sustainability scores, and suggests greener alternatives.
+
+### 🌎 Earth 2050 Simulator
+The Earth 2050 Simulator visualizes how today's choices affect tomorrow's world. Users can toggle a timeline to compare the Business-as-Usual Path (current habits continue) versus a Sustainable Path (eco-friendly decisions adopted).
+
+### 🪐 Personalized Living Planet
+Every user owns a unique virtual 3D ecosystem (built with React Three Fiber). Positive actions grow forests, clear the air, and promote biodiversity. Unsustainable behavior dynamically causes pollution, smog, and desertification based on the user's sustainability score.
+
+### 📊 Carbon Emission Tracker
+Track emissions across 6 core categories (Food, Transportation, Electricity, Shopping, Water, Waste) using a production-grade tracking interface featuring interactive glassmorphism widgets, smooth Framer Motion animations, and Recharts analytics.
+
+### 🏆 Gamification System
+Footprint awareness is useless if users don't return. EcoBuddy leverages an XP system, levels, daily challenges, and streaks to reward users for building sustainable habits.
 
 ---
 
-## 2. Approach & logic
-
-### The decision flow (smart, context-driven assistant)
+## 🏗 Architecture & Technology Stack
 
 ```text
-User inputs (logs, text chat, receipt/meal photos, carbon calculator)
-        │
-        ▼
-EcoSnap / Sprig (Gemini Vision + Pro)  ──►  Categorized Impact & Suggestions
-        │                                          │
-        ▼                                          ▼
-Supabase Datastore                     Personalized 3D Planet
-(Tracks xp, streaks, score)             ├─ Positive: Vegetation & Clean Air
-                                        └─ Negative: Pollution & Desertification
-        │
-        ▼
-Gamification Engine  ──►  Level-ups, Daily Challenges, Leaderboard
+Browser (Next.js + React + Three.js)
+                │
+                ▼
+Next.js API Routes (Serverless Functions)
+                │
+       ┌────────┴────────┐
+       ▼                 ▼
+Google Gemini        Supabase
+(Pro + Vision)       Auth + PostgreSQL
+       │                 │
+       └────────┬────────┘
+                ▼
+      Planet State + Challenges
 ```
 
-The system goes beyond dry statistics by turning everyday actions into a visual, gamified experience:
-
-1. **AI Sustainability Twin (Sprig):** Instead of overwhelming users with numbers, Sprig explains environmental impact conversationally, identifying large contributors and suggesting realistic alternatives.
-2. **Earth 2050 Simulator:** Users can toggle a timeline to see the projected long-term consequences of their current habits side-by-side with a sustainable path.
-3. **Carbon Tracker Hub:** A production-grade tracking interface with interactive glassmorphism widgets, smooth Framer Motion animations, and deep Recharts data visualizations.
-
-### Gamified retention model
-
-Footprint awareness is useless if users don't return. EcoBuddy leverages an XP system, daily challenges, and a community leaderboard to promote long-term engagement and consistent behavioral changes.
+### Stack Details
+* **Frontend:** Next.js 15, TypeScript, Tailwind CSS, Framer Motion, React Three Fiber.
+* **Backend:** Supabase (PostgreSQL + Auth), Next.js Serverless API Routes.
+* **AI Engine:** Google Gemini 2.5 Pro & Gemini Vision.
+* **Deployment:** Vercel.
 
 ---
 
-## 3. How the solution works
+## 🛡️ Code Quality & Validation
 
-### Architecture
+EcoBuddy AI is engineered to be highly readable, maintainable, and resilient to bugs. 
+* **Clean Code:** Core business logic is isolated into pure utility functions, while UI components remain highly modular.
+* **Continuous Integration:** Every push to `main` must pass a rigorous GitHub Actions pipeline featuring **80+ Vitest unit/integration tests**, strict `tsc` type-checking, aggressive ESLint linting, and a successful production build.
 
-```text
-Browser (Next.js, React Three Fiber)    Vercel (Serverless Functions)
-  • 3D Planet UI + Chat      ──HTTP──► Next.js API Routes
-  • Upload receipts/meals                 ├─ POST /api/chat     Sprig conversational engine
-                                          ├─ POST /api/ecosnap  Gemini Vision processing
-                                          └─ GET  /api/metrics  Fetch user history
-                                              │
-                                              ├─► Google Vertex AI (Gemini 2.5 Pro / Vision)
-                                              └─► Supabase (PostgreSQL + Auth)
-```
-
-The Next.js framework serves both the frontend application (complete with Three.js visualizations) and the backend serverless API routes. This allows for rapid iteration and simplified deployments to Vercel. 
+> **Read more about our engineering standards in [docs/code-quality.md](docs/code-quality.md).**
 
 ---
 
-## 4. Vision
+## 🚀 Future Additions
 
-EcoBuddy AI aims to transform sustainability from a passive reporting process into an interactive and emotionally engaging journey.
+EcoBuddy AI is designed to evolve into a complete AI-powered sustainability ecosystem. Planned improvements include:
+
+* **🌤 Real-Time Environmental Intelligence:** Local weather awareness, seasonal suggestions, and air quality insights.
+* **🎙 Voice Companion:** Interact with Sprig using natural voice responses and hands-free coaching.
+* **🧠 Long-Term Memory:** Sprig will remember favorite meals, travel habits, and past achievements for deep context.
+* **🌱 Companion Evolution System:** Sprig will visually evolve from a Seed 🌱 to a Forest Guardian 🌲.
+* **🪐 Advanced Planet Ecosystem:** Dynamic weather, day/night cycles, aurora effects, and wildlife simulations.
+* **📷 Barcode Scanner & Food Database:** Ingredient-level analysis and packaging recognition.
+* **🏡 Smart Home Integration:** Sync with smart meters for automated electricity monitoring.
+* **👥 Community Expansion & Events:** Group challenges, leaderboards, and seasonal events (e.g., Plastic-Free Week).
+* **📱 Progressive Web App (PWA):** Offline access, installable mobile experience, and push notifications.
+
+---
+
+## 🌱 Long-Term Vision
+
+By combining the intelligence of Google Gemini with visualization and gamification, EcoBuddy AI seeks to help millions of people make better choices and collectively build a greener future.
 
 > **"See the future you're creating — and take action to build a greener one."**
-
----
-
-## 5. Code Quality & Evaluation
-
-The EcoBuddy codebase is engineered to be highly readable, maintainable, and resilient to bugs. We strictly adhere to modern software engineering practices to ensure clean code:
-
-### Readability & Clean Code
-- **KISS & DRY Principles:** Core business logic, such as gamification math and carbon emission scaling, is isolated into pure utility functions (`src/lib/carbon-utils.ts`). UI components are kept highly modular and focused.
-- **Strict Typing:** Built with full TypeScript strict mode, preventing generic `any` types and ensuring all data structures (from Supabase queries to React props) are completely predictable and type-safe.
-- **Linting & Formatting:** We use an aggressive ESLint configuration to enforce clean coding habits—catching unused variables, missing dependencies, and potential bugs early.
-
-### Continuous Evaluation (CI/CD)
-Quality is continuously evaluated via a rigorous GitHub Actions pipeline. Every push to the `main` branch must pass multiple automated quality gates:
-1. **Unit & Integration Testing:** A comprehensive `vitest` suite (80+ tests) strictly validates the pure logic, math scaling, API sanitization, and React UI interactions.
-2. **Type Checking:** `tsc --noEmit` validates the entire project graph for type safety.
-3. **Linting:** `npm run lint` guarantees stylistic correctness and hygiene.
-4. **Production Build:** `next build` ensures the application can safely be compiled and optimized for Vercel without throwing runtime errors.
