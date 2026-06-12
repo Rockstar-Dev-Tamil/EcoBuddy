@@ -16,7 +16,7 @@ import {
   Leaf, 
   ChevronLeft, 
   ChevronRight, 
-  
+  Activity,
   LogOut 
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -48,6 +48,7 @@ export const Navbar: React.FC<NavbarProps> = ({ children }) => {
   const navItems = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "3D Planet", href: "/planet", icon: Globe },
+    { name: "Carbon Tracker", href: "/carbon-tracker", icon: Activity },
     { name: "AI Twin", href: "/twin", icon: Bot },
     { name: "EcoSnap AI", href: "/ecosnap", icon: Camera },
     { name: "2050 Simulator", href: "/simulator", icon: Compass },

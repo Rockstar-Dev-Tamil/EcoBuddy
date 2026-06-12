@@ -92,16 +92,20 @@ export function calculatePlanetUpdates(
     updates.desertification = current.desertification - mag * 0.02;
 
     switch (category) {
-      case "transport":
+      case "transportation":
         updates.atmosphere_clarity = current.atmosphere_clarity + mag * 0.05;
         break;
-      case "diet":
+      case "food":
         updates.wildlife = current.wildlife + 0.03;
         updates.vegetation = current.vegetation + 0.02;
         break;
-      case "energy":
+      case "electricity":
         updates.atmosphere_clarity = current.atmosphere_clarity + mag * 0.04;
         break;
+      case "water":
+        updates.desertification = current.desertification - mag * 0.04;
+        break;
+      case "shopping":
       case "waste":
         updates.vegetation = current.vegetation + 0.04;
         break;
@@ -146,9 +150,11 @@ export function aggregateCategoryTotals(
   logs: Array<{ category: string; co2_emission: number }>
 ): Record<string, number> {
   const totals: Record<string, number> = {
-    transport: 0,
-    diet: 0,
-    energy: 0,
+    food: 0,
+    transportation: 0,
+    electricity: 0,
+    shopping: 0,
+    water: 0,
     waste: 0,
   };
 
@@ -159,3 +165,43 @@ export function aggregateCategoryTotals(
 
   return totals;
 }
+
+export const CARBON_CONSTANTS = {
+  food: {
+    "Vegetarian meal": 0.5,
+    "Chicken meal": 2.5,
+    "Beef meal": 7.0,
+    "Dairy consumption": 1.2,
+  },
+  transportation: {
+    "Car": 0.2, // per km
+    "Motorcycle": 0.1, // per km
+    "Metro": 0.03, // per km
+    "Bus": 0.05, // per km
+    "Train": 0.04, // per km
+    "Walking": 0,
+    "Bicycle": 0,
+  },
+  electricity: {
+    "AC usage": 1.2, // per hour
+    "Fan usage": 0.05, // per hour
+    "Refrigerator": 0.1, // per hour
+    "TV": 0.08, // per hour
+    "Washing machine": 0.5, // per load
+  },
+  shopping: {
+    "Clothes": 5.0, // per item
+    "Electronics": 20.0, // per item
+    "Daily purchases": 1.5,
+  },
+  water: {
+    "Showers": 0.3, // per shower
+    "Washing": 0.2, // per load
+    "Household consumption": 0.5, // daily baseline
+  },
+  waste: {
+    "Plastic waste": 1.5, // per kg
+    "Recycling": -0.5, // per kg offset
+    "Composting": -0.8, // per kg offset
+  }
+};

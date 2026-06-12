@@ -322,7 +322,31 @@ export default function DashboardPage() {
                   exit={{ opacity: 0 }}
                   className="w-full h-full flex flex-col justify-between"
                 >
-                  <div className="w-full h-52 mt-2">
+                  <div className="flex justify-around items-center bg-white/[0.02] border border-white/5 rounded-xl p-4 mt-2 mb-4 text-center">
+                    <div>
+                      <span className="text-[9px] text-zinc-500 uppercase font-bold tracking-wider block mb-1">Today&apos;s Emissions</span>
+                      <span className="text-xl font-outfit font-extrabold text-white">
+                        {totalEmissions} <span className="text-sm font-normal text-zinc-500">kg</span>
+                      </span>
+                    </div>
+                    <div className="w-[1px] h-8 bg-zinc-800" />
+                    <div className="relative w-12 h-12 flex items-center justify-center">
+                      <svg className="w-full h-full transform -rotate-90">
+                        <circle cx="24" cy="24" r="20" className="stroke-zinc-800/60 fill-transparent" strokeWidth="4" />
+                        <circle cx="24" cy="24" r="20" className="stroke-accent fill-transparent transition-all duration-1000 ease-out" strokeWidth="4" strokeDasharray="125.6" strokeDashoffset={125.6 - (Math.min(100, (Number(totalOffsets) / (Number(totalEmissions) || 1)) * 100) / 100) * 125.6} strokeLinecap="round" />
+                      </svg>
+                      <span className="absolute text-[10px] font-bold text-accent">{Math.min(100, Math.round((Number(totalOffsets) / (Number(totalEmissions) || 1)) * 100))}%</span>
+                    </div>
+                    <div className="w-[1px] h-8 bg-zinc-800" />
+                    <div>
+                      <span className="text-[9px] text-zinc-500 uppercase font-bold tracking-wider block mb-1">Weekly Trend</span>
+                      <span className="text-sm font-outfit font-bold text-secondary flex items-center justify-center gap-1">
+                        <ArrowUp className="w-3 h-3 rotate-180" /> 12%
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="w-full flex-1 min-h-[140px]">
                     <DynamicResponsiveContainer width="100%" height="100%">
                       <DynamicBarChart data={chartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
                         <defs>
@@ -360,24 +384,13 @@ export default function DashboardPage() {
                     </DynamicResponsiveContainer>
                   </div>
                   
-                  <div className="flex justify-around items-center bg-white/[0.02] border border-white/5 rounded-xl p-3 mt-4 text-center">
-                    <div>
-                      <span className="text-[9px] text-zinc-500 uppercase font-bold tracking-wider">Carbon Emitted</span>
-                      <span className="block text-sm font-outfit font-bold text-zinc-200 mt-0.5">{totalEmissions} kg CO₂</span>
-                    </div>
-                    <div className="w-[1px] h-6 bg-zinc-800" />
-                    <div>
-                      <span className="text-[9px] text-zinc-500 uppercase font-bold tracking-wider">Carbon Offsetted</span>
-                      <span className="block text-sm font-outfit font-bold text-accent mt-0.5">-{totalOffsets} kg CO₂</span>
-                    </div>
-                    <div className="w-[1px] h-6 bg-zinc-800" />
-                    <div>
-                      <span className="text-[9px] text-zinc-500 uppercase font-bold tracking-wider">Net Carbon Status</span>
-                      <span className={`block text-sm font-outfit font-bold mt-0.5 ${Number(totalEmissions) > Number(totalOffsets) ? "text-amber-400" : "text-secondary"}`}>
-                        {(Number(totalEmissions) - Number(totalOffsets)).toFixed(1)} kg
-                      </span>
-                    </div>
-                  </div>
+                  <button 
+                    onClick={() => router.push("/carbon-tracker")}
+                    className="w-full mt-4 py-2 bg-accent/10 hover:bg-accent/20 border border-accent/20 text-accent rounded-xl text-xs font-syne font-bold flex items-center justify-center gap-1.5 transition-all duration-300"
+                  >
+                    <span>Open Detailed Carbon Tracker</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
                 </motion.div>
               ) : (
                 <motion.div 

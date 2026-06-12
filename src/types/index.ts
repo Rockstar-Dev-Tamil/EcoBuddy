@@ -24,7 +24,7 @@ export interface PlanetState {
 export interface SustainabilityLog {
   id: string;
   profile_id: string;
-  category: "transport" | "diet" | "energy" | "waste" | string;
+  category: "food" | "transportation" | "electricity" | "shopping" | "water" | "waste" | string;
   description: string;
   carbon_offset: number; // positive for offsets/reductions (kg)
   co2_emission: number;  // absolute emission (kg)

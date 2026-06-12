@@ -273,7 +273,7 @@ export const SupabaseService = {
 
       if (error) throw error;
       
-      return data.map((item: any, idx: number) => ({
+      return data.map((item: Record<string, unknown>, idx: number) => ({
         profile_id: String(item.id),
         username: String(item.username),
         xp: Number(item.xp),

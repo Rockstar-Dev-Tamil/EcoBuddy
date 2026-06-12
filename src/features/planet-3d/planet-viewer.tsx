@@ -762,10 +762,8 @@ const FireflyParticles: React.FC<{ pollution: number; count: number }> = ({ poll
 // Main Canvas Render Component
 export const PlanetViewer: React.FC<PlanetViewerProps> = ({
   vegetation,
-  rivers: _rivers,
   wildlife,
   pollution,
-  desertification,
   cloudSpeedMultiplier = 1.0,
   isNightMode = false,
   autoRotate = false

@@ -356,15 +356,15 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const total = Object.values(categoryTotals).reduce((sum, v) => sum + v, 0);
 
     const config: Record<string, { desc: string; rec: string }> = {
-      transport: {
+      transportation: {
         desc: "Single-passenger vehicle trips contribute significantly to your atmosphere smog.",
         rec: "Try carpooling, boarding public transit, or cycling. Clicking 'Fix This' will ask your Twin to optimize your commute budget.",
       },
-      diet: {
+      food: {
         desc: "Frequent food deliveries and red-meat meals carry heavy logistics packaging and packaging waste.",
         rec: "Cook at home and try plant-based meals at least 3 times a week. Your twin can compile a weekly vegetarian meal plan.",
       },
-      energy: {
+      electricity: {
         desc: "Electricity spikes are caused by leave-on cooling units and power-vampire appliances.",
         rec: "Optimize thermostat schedules, switch to smart strips, and purchase energy-star devices.",
       },
@@ -372,6 +372,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         desc: "Throwing away single-use plastics and failing to compost organic scraps creates methane leakage.",
         rec: "Use canvas bags, carry a metal tumbler, and filter waste. Your twin can guide you on composting setups.",
       },
+      shopping: {
+        desc: "Excessive fast-fashion or electronics purchases dramatically increase your carbon debt.",
+        rec: "Prioritize second-hand clothing, repair electronics, and reduce daily impulse purchases.",
+      },
+      water: {
+        desc: "High household water consumption leads to energy-intensive water treatment and desertification.",
+        rec: "Take shorter showers, fix leaks, and run full loads in your washing machine.",
+      }
     };
 
     return Object.entries(categoryTotals).map(([category, value]) => ({
