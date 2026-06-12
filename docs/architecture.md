@@ -10,8 +10,8 @@ context and deployment steps.
 ```text
 Browser (React + TS, Next.js)           Vercel (Serverless Environment)
   • accessible UI + 3D Planet  ──HTTP──► Next.js API Routes
-  • anonymous device id (auth)            ├─ POST /api/chat      Sprig conversational engine
-                                          ├─ POST /api/ecosnap   Gemini Vision processing
+  • Carbon Tracker Hub                    ├─ POST /api/chat      Sprig conversational engine
+  • anonymous device id (auth)            ├─ POST /api/ecosnap   Gemini Vision processing
                                           ├─ POST /api/entries   save snapshot
                                           ├─ GET  /api/metrics   history
                                           └─ GET  /  (+ assets)  serves built SPA
@@ -39,8 +39,8 @@ Design rules the codebase follows:
 | Concern | Location |
 | --- | --- |
 | State + API orchestration | `src/app/simulator/hooks/` and generic React hooks |
-| Presentation | `src/components/` and `src/app/simulator/components/` |
-| Client Utilities | `src/lib/` (types, local storage wrappers) |
+| Presentation | `src/components/`, `src/app/simulator/components/`, and `src/app/carbon-tracker/` |
+| Client Utilities | `src/lib/` (types, local storage wrappers, carbon calculation logic) |
 
 ## Quality gates
 
