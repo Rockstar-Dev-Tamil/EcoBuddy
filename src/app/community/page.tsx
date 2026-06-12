@@ -4,47 +4,17 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useGame } from "@/stores/game-store";
 import { 
   Users, 
-  Trophy, 
-  Award, 
   PlusCircle, 
   ArrowUp, 
   ArrowDown, 
   Check, 
-  Sparkles, 
   FolderPlus,
   Flame,
-  Globe,
-  Star,
-  ChevronRight,
-  TrendingUp
+  ChevronRight
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Circular indicator inside player cards
-const MiniProgressCircle: React.FC<{ value: number; colorClass: string }> = ({ value, colorClass }) => {
-  const r = 14;
-  const circ = 2 * Math.PI * r;
-  const offset = circ - (value / 100) * circ;
-
-  return (
-    <div className="relative w-8 h-8 flex items-center justify-center shrink-0">
-      <svg className="w-full h-full transform -rotate-90">
-        <circle cx="16" cy="16" r={r} className="stroke-zinc-800 fill-transparent" strokeWidth="2" />
-        <circle 
-          cx="16" 
-          cy="16" 
-          r={r} 
-          className={`${colorClass} fill-transparent transition-all duration-700 ease-out`} 
-          strokeWidth="2" 
-          strokeDasharray={circ} 
-          strokeDashoffset={offset} 
-          strokeLinecap="round"
-        />
-      </svg>
-      <span className="absolute text-[8px] font-bold font-mono text-zinc-300">{value}</span>
-    </div>
-  );
-};
+// MiniProgressCircle removed since it's unused
 
 export default function CommunityPage() {
   const {
@@ -63,6 +33,7 @@ export default function CommunityPage() {
   const [newGroupType, setNewGroupType] = useState("family");
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -106,10 +77,7 @@ export default function CommunityPage() {
     return leaderboard.slice(0, 3);
   }, [leaderboard]);
 
-  const normalRankings = useMemo(() => {
-    if (!leaderboard) return [];
-    return leaderboard.slice(3);
-  }, [leaderboard]);
+  // normalRankings could be used in the future if we show the remaining leaderboard items separately
 
   const handleCreateGroupSubmit = (e: React.FormEvent) => {
     e.preventDefault();

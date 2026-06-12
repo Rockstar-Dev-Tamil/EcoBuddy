@@ -2,7 +2,16 @@
 
 import React, { useState } from "react";
 import { useGame } from "@/stores/game-store";
-import { Camera, FileText, Check, AlertTriangle, HelpCircle, ArrowRight, Upload, Leaf, ShieldAlert } from "lucide-react";
+import { 
+  Camera, 
+  ScanLine, 
+  Leaf, 
+  Check, 
+  RefreshCcw, 
+  ShieldAlert, 
+  Info,
+  ChevronRight
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GeminiEcoSnapService } from "@/services/gemini/ecosnap";
 
@@ -180,10 +189,10 @@ export default function EcoSnapPage() {
 
       setScanStep(5);
       setScanResult(data);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
       setScanStep(0);
-      setErrorMsg(err.message || "Something went wrong during the analysis.");
+      setErrorMsg(err instanceof Error ? err.message : "Something went wrong during the analysis.");
     } finally {
       setIsScanning(false);
     }
@@ -253,7 +262,8 @@ export default function EcoSnapPage() {
 
                 {selectedImage ? (
                   <div className="relative w-full h-full rounded-xl overflow-hidden bg-black flex items-center justify-center">
-                  <img src={selectedImage} alt={`Preview of uploaded file: ${fileName}`} className="w-full h-full object-cover opacity-75" />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={selectedImage} alt={`Preview of uploaded file: ${fileName}`} className="w-full h-full object-cover opacity-75" />
                     
                     {/* Glowing Laser Scan beam */}
                     {isScanning && (
@@ -431,11 +441,11 @@ export default function EcoSnapPage() {
                   <div className="glass-panel p-4.5 rounded-2xl border border-white/5 bg-white/[0.02] flex gap-4 items-start mb-6">
                     <MiniSprig />
                     <div className="flex-1 text-xs text-zinc-300 leading-relaxed relative bg-zinc-950/40 px-3.5 py-2.5 rounded-xl border border-white/5">
-                      <span className="font-syne font-bold text-accent block mb-1">Sprig's Vision Summary</span>
+                      <span className="font-syne font-bold text-accent block mb-1">Sprig&apos;s Vision Summary</span>
                       <p>
-                        "I analyzed this photo! I detected {scanResult.description} (a {scanResult.category} category). 
+                        &quot;I analyzed this photo! I detected {scanResult.description} (a {scanResult.category} category). 
                         {scanResult.alternatives.length > 0 && ` If you substitute this with '${scanResult.alternatives[0].name}', you could offset about ${scanResult.alternatives[0].carbonSaving} kg CO₂! `}
-                        Log this item to ledger now to secure your +{scanResult.xpEarned} XP!"
+                        Log this item to ledger now to secure your +{scanResult.xpEarned} XP!&quot;
                       </p>
                     </div>
                   </div>

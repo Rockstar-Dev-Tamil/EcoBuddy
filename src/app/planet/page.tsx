@@ -3,8 +3,7 @@
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useGame } from "@/stores/game-store";
-import { Globe, RefreshCw, Sparkles, AlertTriangle, ShieldCheck, Sun } from "lucide-react";
-import { motion } from "framer-motion";
+import { Globe, RefreshCw, AlertTriangle, ShieldCheck, Sun } from "lucide-react";
 
 // Dynamically import Three.js / React Three Fiber component to prevent SSR errors
 const PlanetViewer = dynamic(
@@ -90,7 +89,9 @@ export default function PlanetPage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     syncWithLedger();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [planet]);
 
   // Preset extreme environmental simulations

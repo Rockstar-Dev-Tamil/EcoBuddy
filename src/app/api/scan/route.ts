@@ -12,7 +12,7 @@ const isGeminiConfigured = (): boolean => {
 };
 
 // Load service account credentials for Google Cloud Vision API
-let serviceAccount: any = null;
+let serviceAccount: { client_email?: string; private_key?: string } | null = null;
 try {
   if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
     serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
@@ -39,7 +39,7 @@ export const isGoogleVisionConfigured = (): boolean => {
   return !!(serviceAccount && serviceAccount.private_key && serviceAccount.client_email);
 };
 
-export async function getGoogleAccessToken(sa: any): Promise<string> {
+export async function getGoogleAccessToken(sa: { client_email: string; private_key: string }): Promise<string> {
   const header = {
     alg: "RS256",
     typ: "JWT"
@@ -54,7 +54,7 @@ export async function getGoogleAccessToken(sa: any): Promise<string> {
     iat: now
   };
   
-  const base64UrlEncode = (obj: any) => {
+  const base64UrlEncode = (obj: unknown) => {
     return Buffer.from(JSON.stringify(obj))
       .toString("base64")
       .replace(/=/g, "")
@@ -126,7 +126,7 @@ export async function callGoogleVision(base64Data: string, accessToken: string) 
   return res.json();
 }
 
-export function heuristicParseOCR(ocrText: string, labels: string[], filename: string) {
+export function heuristicParseOCR(ocrText: string, _labels: string[], _filename: string) {
   const ocrLower = ocrText.toLowerCase();
   let category: "diet" | "energy" | "transport" | "waste" = "diet";
   let summaryDescription = "Scanned Item (OCR parse)";
@@ -305,7 +305,7 @@ export async function POST(req: Request) {
         
         const ocrText = visionResult.responses?.[0]?.textAnnotations?.[0]?.description || "";
         const labelObjs = visionResult.responses?.[0]?.labelAnnotations || [];
-        const labels = labelObjs.map((l: any) => l.description);
+        const labels = labelObjs.map((l: { description: string }) => l.description);
         
         if (ocrText.trim().length > 0) {
           usedGoogleVision = true;
@@ -410,7 +410,7 @@ Do not wrap the response in markdown blocks or write any other text, just output
     let totalCO2 = 0;
     let totalScore = 0;
     let matchCount = 0;
-    let datasetSources: string[] = [];
+    const datasetSources: string[] = [];
 
     for (const item of items) {
       const { name, value, unit, barcode } = item;
@@ -486,7 +486,7 @@ Do not wrap the response in markdown blocks or write any other text, just output
 
     // Map suggested alternatives and attach carbon savings deterministically
     const rawAlternatives = parsedData.suggestedAlternatives || [];
-    const formattedAlternatives = rawAlternatives.slice(0, 3).map((alt: any, idx: number) => {
+    const formattedAlternatives = rawAlternatives.slice(0, 3).map((alt: { name: string; description?: string }, idx: number) => {
       let saving = 0.5;
       if (scannedType === "energy") saving = (idx + 1) * 4.2;
       else if (scannedType === "diet") saving = (idx + 1) * 0.45;
@@ -516,10 +516,10 @@ Do not wrap the response in markdown blocks or write any other text, just output
       isMock: false,
       usedGoogleVision
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Gemini Vision Custom Pipeline Error:", error);
     
-    const errMsg = error?.message || "";
+    const errMsg = error instanceof Error ? error.message : String(error);
     if (
       errMsg.includes("503") ||
       errMsg.includes("high demand") ||
@@ -534,7 +534,7 @@ Do not wrap the response in markdown blocks or write any other text, just output
     }
     
     return NextResponse.json(
-      { error: "Scan pipeline failed: " + error.message },
+      { error: "Scan pipeline failed: " + (error instanceof Error ? error.message : "Unknown error") },
       { status: 500 }
     );
   }

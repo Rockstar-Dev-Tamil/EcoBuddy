@@ -86,7 +86,7 @@ export async function POST(req: Request) {
 - Total Green Score: ${profile?.green_score || 0}
 - Planet Status: Pollution ${Math.round((planet?.pollution || 0) * 100)}%, Vegetation ${Math.round((planet?.vegetation || 0) * 100)}%
 - Recent User Actions:
-${recentLogs.map((l: any) => `  * ${l.action_name} (${l.category}, ${l.co2_emission > 0 ? "Emitted" : "Saved"} ${Math.abs(l.co2_emission)}kg)`).join("\n")}
+${recentLogs.map((l: { action_name: string; category: string; co2_emission: number }) => `  * ${l.action_name} (${l.category}, ${l.co2_emission > 0 ? "Emitted" : "Saved"} ${Math.abs(l.co2_emission)}kg)`).join("\n")}
 Reference these memories naturally to build an emotional connection. For example, "You avoided takeout three times this week 🌿" or "Your planet is greener than last month!"`;
     }
 
@@ -130,10 +130,10 @@ Reference these memories naturally to build an emotional connection. For example
 
     const responseText = result.response.text();
     return NextResponse.json({ reply: responseText, isMock: false });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Gemini Chat API Error:", error);
     
-    const errMsg = error?.message || "";
+    const errMsg = error instanceof Error ? error.message : String(error);
     if (
       errMsg.includes("503") ||
       errMsg.includes("high demand") ||

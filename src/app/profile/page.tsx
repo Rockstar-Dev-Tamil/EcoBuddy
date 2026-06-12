@@ -6,7 +6,7 @@ import { useGame } from "@/stores/game-store";
 import { supabase } from "@/lib/supabase";
 import { SupabaseService } from "@/services/supabase-service";
 import { MockDB } from "@/lib/mock-db";
-import { User, Camera, LogOut, Award, Flame, ShieldAlert, Sparkles, Check } from "lucide-react";
+import { User, Camera, LogOut, Flame, Check } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function ProfilePage() {
@@ -22,6 +22,7 @@ export default function ProfilePage() {
 
   // Seed form values from profile state
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     if (profile) {
       setUsername(profile.username || "");
@@ -70,9 +71,9 @@ export default function ProfilePage() {
       refreshAll();
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      setErrorMsg(err.message || "Failed to save profile changes.");
+      setErrorMsg(err instanceof Error ? err.message : "Failed to save profile changes.");
     } finally {
       setIsSaving(false);
     }
@@ -149,6 +150,7 @@ export default function ProfilePage() {
                 <div className="relative group">
                   <div className="w-20 h-20 rounded-full border-2 border-zinc-700 bg-zinc-900 flex items-center justify-center font-bold text-accent text-2xl overflow-hidden shadow-inner select-none">
                     {avatarUrl ? (
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={avatarUrl} alt="User Avatar" className="w-full h-full object-cover" />
                     ) : (
                       username ? username[0].toUpperCase() : "U"

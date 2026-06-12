@@ -4,9 +4,10 @@ import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 
 export const LeafLoader: React.FC = () => {
-  // Generate stable particle offsets to prevent hydration mismatch
-  const particles = useMemo(() => {
-    return Array.from({ length: 16 }).map((_, i) => ({
+  const [particles, setParticles] = React.useState<Array<{id: number, size: number, startX: number, startY: number, endX: number, endY: number, duration: number, delay: number}>>([]);
+
+  React.useEffect(() => {
+    setParticles(Array.from({ length: 16 }).map((_, i) => ({
       id: i,
       size: Math.floor(Math.random() * 4) + 2,
       startX: (Math.random() - 0.5) * 30,
@@ -15,7 +16,7 @@ export const LeafLoader: React.FC = () => {
       endY: -100 - Math.random() * 100,
       duration: 2.5 + Math.random() * 2.5,
       delay: Math.random() * 2,
-    }));
+    })));
   }, []);
 
   return (
