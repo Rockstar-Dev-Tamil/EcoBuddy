@@ -20,12 +20,12 @@ vi.mock("next/navigation", () => ({
 // Consumer Component for Integration Testing
 const TestConsumer = () => {
   const { profile, logAction } = useGame();
-  
+
   return (
     <div>
       <span data-testid="user-level">Level: {profile.level}</span>
       <span data-testid="green-score">Score: {profile.green_score}</span>
-      <button 
+      <button
         data-testid="btn-log-action"
         onClick={() => logAction("transport", "Biked 10km", 0.0, 5.0, 100)}
       >
@@ -52,7 +52,7 @@ describe("GameStore State Integration", () => {
     // Assert initial rendering states from MockDB seed values
     expect(screen.getByTestId("user-level")).toHaveTextContent("Level: 1");
     const initialScoreText = screen.getByTestId("green-score").textContent;
-    
+
     // Simulate clicking the Log Action button
     const btn = screen.getByTestId("btn-log-action");
     await act(async () => {

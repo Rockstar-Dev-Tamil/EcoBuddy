@@ -43,7 +43,7 @@ describe("LandingPage UI Rendering", () => {
     act(() => {
       vi.advanceTimersByTime(3500);
     });
-    
+
     // Check main titles and tags
     expect(screen.getByText("EcoBuddy AI")).toBeInTheDocument();
     expect(screen.getByText("The Autonomous Eco Companion")).toBeInTheDocument();
@@ -57,7 +57,7 @@ describe("LandingPage UI Rendering", () => {
     act(() => {
       vi.advanceTimersByTime(3500);
     });
-    
+
     // Auth card labels & buttons
     expect(screen.getByText("Access EcoBuddy")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /continue with google/i })).toBeInTheDocument();

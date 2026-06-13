@@ -7,10 +7,10 @@
  */
 
 import type { PlanetState } from "@/types";
+import { CARBON_CONSTANTS } from "@/constants/carbon";
 
-// ---------------------------------------------------------------------------
-// XP / Level helpers
-// ---------------------------------------------------------------------------
+// Re-export constants for backward compatibility
+export { CARBON_CONSTANTS };
 
 /** XP required to reach the next level (every 1000 XP = 1 level). */
 export const XP_PER_LEVEL = 1000;
@@ -18,6 +18,9 @@ export const XP_PER_LEVEL = 1000;
 /**
  * Given a raw XP value, returns a structured breakdown of the current level,
  * progress within that level, and how many XP remain until the next level.
+ *
+ * @param xp - The raw experience points value.
+ * @returns An object containing the current level, progress, and remaining XP.
  */
 export function calculateXPLevel(xp: number): {
   level: number;
@@ -34,6 +37,9 @@ export function calculateXPLevel(xp: number): {
 
 /**
  * Returns the human-readable level tier name for a given numeric level.
+ *
+ * @param level - The current user level.
+ * @returns A string representing the level's tier name.
  */
 export function getLevelName(level: number): string {
   if (level >= 15) return "Forest Guardian";
@@ -43,14 +49,13 @@ export function getLevelName(level: number): string {
   return "Seed";
 }
 
-// ---------------------------------------------------------------------------
-// Green Score helpers
-// ---------------------------------------------------------------------------
-
 /**
  * Calculates how much the Green Score should change given a carbon offset value.
  * Positive offset → score increases; negative (emission) → score decreases.
  * Result is clamped so the final score stays in [10, 100].
+ *
+ * @param carbonOffset - Carbon offset in kg (positive for reductions, negative for emissions).
+ * @returns The delta value to apply to the green score.
  */
 export function calculateGreenScoreDelta(carbonOffset: number): number {
   if (carbonOffset > 0) {
@@ -61,19 +66,24 @@ export function calculateGreenScoreDelta(carbonOffset: number): number {
 
 /**
  * Applies a delta to the current green score, clamping it within [10, 100].
+ *
+ * @param current - The current green score.
+ * @param delta - The delta value to apply.
+ * @returns The new green score within [10, 100].
  */
 export function applyGreenScore(current: number, delta: number): number {
   return Math.max(10, Math.min(100, current + delta));
 }
 
-// ---------------------------------------------------------------------------
-// Planet state helpers
-// ---------------------------------------------------------------------------
-
 /**
  * Calculates partial updates to the planet state record based on a logged action.
  * Returns only the fields that need updating so callers can spread them into
  * an upsert operation.
+ *
+ * @param category - Category of action (e.g. transport, diet).
+ * @param carbonOffset - Impact magnitude of action.
+ * @param current - The user's current planet status factors.
+ * @returns A partial PlanetState updates structure.
  */
 export function calculatePlanetUpdates(
   category: string,
@@ -93,13 +103,16 @@ export function calculatePlanetUpdates(
 
     switch (category) {
       case "transportation":
+      case "transport":
         updates.atmosphere_clarity = current.atmosphere_clarity + mag * 0.05;
         break;
       case "food":
+      case "diet":
         updates.wildlife = current.wildlife + 0.03;
         updates.vegetation = current.vegetation + 0.02;
         break;
       case "electricity":
+      case "energy":
         updates.atmosphere_clarity = current.atmosphere_clarity + mag * 0.04;
         break;
       case "water":
@@ -121,10 +134,6 @@ export function calculatePlanetUpdates(
   return updates;
 }
 
-// ---------------------------------------------------------------------------
-// Carbon Detective helpers
-// ---------------------------------------------------------------------------
-
 export type DetectiveSeverity = "high" | "medium" | "low";
 
 /**
@@ -132,11 +141,9 @@ export type DetectiveSeverity = "high" | "medium" | "low";
  *
  * @param value - Absolute CO2 emissions for this category (kg).
  * @param total - Total CO2 emissions across all categories.
+ * @returns The severity tier: "high", "medium", or "low".
  */
-export function classifyDetectiveSeverity(
-  value: number,
-  total: number
-): DetectiveSeverity {
+export function classifyDetectiveSeverity(value: number, total: number): DetectiveSeverity {
   const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
   if (percentage > 40 || value > 8) return "high";
   if (percentage > 20 || value > 4) return "medium";
@@ -145,6 +152,9 @@ export function classifyDetectiveSeverity(
 
 /**
  * Aggregates an array of sustainability logs into per-category emission totals.
+ *
+ * @param logs - Array of logged actions.
+ * @returns A record containing emission totals indexed by category name.
  */
 export function aggregateCategoryTotals(
   logs: Array<{ category: string; co2_emission: number }>
@@ -159,49 +169,15 @@ export function aggregateCategoryTotals(
   };
 
   for (const log of logs) {
-    const cat = log.category in totals ? log.category : "waste";
-    totals[cat] += log.co2_emission;
+    let cat = log.category;
+    // Map short codes to normalized schemas
+    if (cat === "diet") cat = "food";
+    if (cat === "transport") cat = "transportation";
+    if (cat === "energy") cat = "electricity";
+
+    const normalized = cat in totals ? cat : "waste";
+    totals[normalized] += log.co2_emission;
   }
 
   return totals;
 }
-
-export const CARBON_CONSTANTS = {
-  food: {
-    "Vegetarian meal": 0.5,
-    "Chicken meal": 2.5,
-    "Beef meal": 7.0,
-    "Dairy consumption": 1.2,
-  },
-  transportation: {
-    "Car": 0.2, // per km
-    "Motorcycle": 0.1, // per km
-    "Metro": 0.03, // per km
-    "Bus": 0.05, // per km
-    "Train": 0.04, // per km
-    "Walking": 0,
-    "Bicycle": 0,
-  },
-  electricity: {
-    "AC usage": 1.2, // per hour
-    "Fan usage": 0.05, // per hour
-    "Refrigerator": 0.1, // per hour
-    "TV": 0.08, // per hour
-    "Washing machine": 0.5, // per load
-  },
-  shopping: {
-    "Clothes": 5.0, // per item
-    "Electronics": 20.0, // per item
-    "Daily purchases": 1.5,
-  },
-  water: {
-    "Showers": 0.3, // per shower
-    "Washing": 0.2, // per load
-    "Household consumption": 0.5, // daily baseline
-  },
-  waste: {
-    "Plastic waste": 1.5, // per kg
-    "Recycling": -0.5, // per kg offset
-    "Composting": -0.8, // per kg offset
-  }
-};

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { z } from "zod";
+import DOMPurify from "isomorphic-dompurify";
 
 const apiKey = process.env.GEMINI_API_KEY;
 
@@ -8,47 +10,153 @@ const isGeminiConfigured = (): boolean => {
   return !!(apiKey && apiKey !== "your-gemini-api-key");
 };
 
+// Simple in-memory rate limiter configuration
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const LIMIT = 15; // Max 15 requests per minute
+const WINDOW_MS = 60 * 1000;
+
+/**
+ * Checks whether a given client IP address has exceeded the rate limit.
+ *
+ * @param ip - Client IP address string.
+ * @returns True if rate limited, false otherwise.
+ */
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+  if (!record) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + WINDOW_MS });
+    return false;
+  }
+  if (now > record.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + WINDOW_MS });
+    return false;
+  }
+  record.count++;
+  return record.count > LIMIT;
+}
+
+// Zod Schema to validate incoming chat request payloads
+const chatRequestSchema = z.object({
+  message: z.string().min(1).max(2000),
+  history: z
+    .array(
+      z.object({
+        sender: z.enum(["user", "ai"]),
+        message: z.string(),
+      })
+    )
+    .optional(),
+  context: z
+    .object({
+      profile: z
+        .object({
+          level: z.number().optional(),
+          green_score: z.number().optional(),
+        })
+        .optional(),
+      planet: z
+        .object({
+          pollution: z.number().optional(),
+          vegetation: z.number().optional(),
+        })
+        .optional(),
+      logs: z.array(z.any()).optional(),
+      achievements: z.array(z.any()).optional(),
+    })
+    .optional(),
+});
+
+/**
+ * HTTP POST route handler for the Twin chatbot assistant.
+ * Handles Zod payload validation, DOMPurify sanitization, and IP rate limiting.
+ *
+ * @param req - Next.js Request object.
+ * @returns Next.js NextResponse containing AI reply or errors.
+ */
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { message: rawMessage, history, context } = body;
-
-    // ─── Server-side input sanitization ──────────────────────────────────────
-    if (!rawMessage || typeof rawMessage !== "string") {
-      return NextResponse.json({ error: "Message is required and must be a string" }, { status: 400 });
+    // ─── Rate Limiting check ──────────────────────────────────────────────────
+    const clientIp = req.headers.get("x-forwarded-for") || "127.0.0.1";
+    if (isRateLimited(clientIp)) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again in a minute." },
+        { status: 429 }
+      );
     }
 
-    // Strip HTML / script tags to prevent injection into the Gemini prompt context
-    const stripped = rawMessage.replace(/<[^>]*>/g, "").trim();
-
-    // Clamp to 2000 characters — prevents prompt injection overflows
-    const message = stripped.slice(0, 2_000);
-
-    if (!message) {
-      return NextResponse.json({ error: "Message cannot be empty after sanitization" }, { status: 400 });
+    // ─── Input parsing ────────────────────────────────────────────────────────
+    let rawBody;
+    try {
+      rawBody = await req.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
-    // ─── End sanitization ─────────────────────────────────────────────────────
+
+    // ─── Zod validation ───────────────────────────────────────────────────────
+    const validationResult = chatRequestSchema.safeParse(rawBody);
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: validationResult.error.issues },
+        { status: 400 }
+      );
+    }
+
+    const { message: validatedMessage, history, context } = validationResult.data;
+
+    // ─── DOMPurify sanitization ───────────────────────────────────────────────
+    const sanitizedInput = DOMPurify.sanitize(validatedMessage).trim();
+    if (!sanitizedInput) {
+      return NextResponse.json(
+        { error: "Message cannot be empty after sanitization" },
+        { status: 400 }
+      );
+    }
 
     // FALLBACK MOCK CHAT INTELLIGENCE
     if (!isGeminiConfigured()) {
-      let reply = "I am processing your query. That seems like a solid way to optimize your carbon footprint! Try reducing your daily electric consumption or opting for public transit.";
-      const msgLower = message.toLowerCase();
-      
-      if (msgLower.includes("order food") || msgLower.includes("delivery") || msgLower.includes("eat") || msgLower.includes("dinner")) {
-        reply = "Cooking at home would reduce your emissions by approximately 1.8 kg CO₂ compared to food delivery. Based on your logs, food transport is a key contributor to your footprint this week. Would you like a quick green recipe suggestion?";
-      } else if (msgLower.includes("travel") || msgLower.includes("car") || msgLower.includes("transport") || msgLower.includes("drive")) {
-        reply = "Switching to public transit or cycling for trips under 5km cuts carbon emissions by up to 85%. Your weekly transit footprint is currently 12.4 kg CO₂. Consider logging a bicycle ride tomorrow!";
-      } else if (msgLower.includes("electricity") || msgLower.includes("appliance") || msgLower.includes("ac") || msgLower.includes("energy")) {
-        reply = "High electricity usage detected in your logs (3.2 kg CO₂ yesterday). Setting your thermostat just 2°C higher or unplugging idle appliances can save about 1.2 kg CO₂ daily and reduce your utility bill.";
-      } else if (msgLower.includes("plant") || msgLower.includes("vegetation") || msgLower.includes("3d")) {
-        reply = "Your 3D virtual planet is a living reflection of your habits. Planting trees by logging green actions (like biking or recycling) increases vegetation. High electricity spikes activate pollution smog, which can desertify terrain.";
+      let reply =
+        "I am processing your query. That seems like a solid way to optimize your carbon footprint! Try reducing your daily electric consumption or opting for public transit.";
+      const msgLower = sanitizedInput.toLowerCase();
+
+      if (
+        msgLower.includes("order food") ||
+        msgLower.includes("delivery") ||
+        msgLower.includes("eat") ||
+        msgLower.includes("dinner")
+      ) {
+        reply =
+          "Cooking at home would reduce your emissions by approximately 1.8 kg CO₂ compared to food delivery. Based on your logs, food transport is a key contributor to your footprint this week. Would you like a quick green recipe suggestion?";
+      } else if (
+        msgLower.includes("travel") ||
+        msgLower.includes("car") ||
+        msgLower.includes("transport") ||
+        msgLower.includes("drive")
+      ) {
+        reply =
+          "Switching to public transit or cycling for trips under 5km cuts carbon emissions by up to 85%. Your weekly transit footprint is currently 12.4 kg CO₂. Consider logging a bicycle ride tomorrow!";
+      } else if (
+        msgLower.includes("electricity") ||
+        msgLower.includes("appliance") ||
+        msgLower.includes("ac") ||
+        msgLower.includes("energy")
+      ) {
+        reply =
+          "High electricity usage detected in your logs (3.2 kg CO₂ yesterday). Setting your thermostat just 2°C higher or unplugging idle appliances can save about 1.2 kg CO₂ daily and reduce your utility bill.";
+      } else if (
+        msgLower.includes("plant") ||
+        msgLower.includes("vegetation") ||
+        msgLower.includes("3d")
+      ) {
+        reply =
+          "Your 3D virtual planet is a living reflection of your habits. Planting trees by logging green actions (like biking or recycling) increases vegetation. High electricity spikes activate pollution smog, which can desertify terrain.";
       }
-      
+
       return NextResponse.json({ reply, isMock: true });
     }
 
     const genAI = new GoogleGenerativeAI(apiKey!);
-    
+
     // We use gemini-2.5-flash which has free-tier quota support
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash",
@@ -86,13 +194,13 @@ export async function POST(req: Request) {
 - Total Green Score: ${profile?.green_score || 0}
 - Planet Status: Pollution ${Math.round((planet?.pollution || 0) * 100)}%, Vegetation ${Math.round((planet?.vegetation || 0) * 100)}%
 - Recent User Actions:
-${recentLogs.map((l: { action_name: string; category: string; co2_emission: number }) => `  * ${l.action_name} (${l.category}, ${l.co2_emission > 0 ? "Emitted" : "Saved"} ${Math.abs(l.co2_emission)}kg)`).join("\n")}
+${recentLogs.map((l: { action_name?: string; description?: string; category: string; co2_emission: number }) => `  * ${l.action_name || l.description} (${l.category}, ${l.co2_emission > 0 ? "Emitted" : "Saved"} ${Math.abs(l.co2_emission)}kg)`).join("\n")}
 Reference these memories naturally to build an emotional connection. For example, "You avoided takeout three times this week 🌿" or "Your planet is greener than last month!"`;
     }
 
     // Format chat history for Gemini API
     const contents = [];
-    
+
     // Inject Sprig Memories as a hidden user message at the very start
     if (memoryContext) {
       contents.push({
@@ -104,7 +212,7 @@ Reference these memories naturally to build an emotional connection. For example
         parts: [{ text: "I have reviewed my memories. How can I help you today?" }],
       });
     }
-    
+
     // Add past history (limit to last 10 messages for token efficiency)
     const recentHistory = history ? history.slice(-10) : [];
     for (const msg of recentHistory) {
@@ -117,7 +225,7 @@ Reference these memories naturally to build an emotional connection. For example
     // Add current user prompt
     contents.push({
       role: "user",
-      parts: [{ text: message }],
+      parts: [{ text: sanitizedInput }],
     });
 
     const result = await model.generateContent({
@@ -132,7 +240,7 @@ Reference these memories naturally to build an emotional connection. For example
     return NextResponse.json({ reply: responseText, isMock: false });
   } catch (error) {
     console.error("Gemini Chat API Error:", error);
-    
+
     const errMsg = error instanceof Error ? error.message : String(error);
     if (
       errMsg.includes("503") ||
@@ -143,13 +251,20 @@ Reference these memories naturally to build an emotional connection. For example
       errMsg.includes("Service Unavailable")
     ) {
       return NextResponse.json(
-        { error: "The AI model is experiencing high demand or has reached its rate limits. Please try again in a few minutes." },
+        {
+          error:
+            "The AI model is experiencing high demand or has reached its rate limits. Please try again in a few minutes.",
+        },
         { status: 503 }
       );
     }
 
     return NextResponse.json(
-      { error: "Failed to generate AI response: " + (error instanceof Error ? error.message : String(error)) },
+      {
+        error:
+          "Failed to generate AI response: " +
+          (error instanceof Error ? error.message : String(error)),
+      },
       { status: 500 }
     );
   }

@@ -30,10 +30,7 @@ const ALLOWED_MIME_TYPES = new Set([
 
 const MAX_BASE64_CHARS = 7_000_000;
 
-function validateScanInput(
-  imageBase64: unknown,
-  filename: unknown
-): ScanValidationResult {
+function validateScanInput(imageBase64: unknown, filename: unknown): ScanValidationResult {
   // 1. Presence + type check
   if (!imageBase64 || typeof imageBase64 !== "string") {
     return { valid: false, status: 400, error: "imageBase64 is required and must be a string" };
@@ -100,8 +97,10 @@ function validateChatInput(rawMessage: unknown): ChatValidationResult {
 // ===========================================================================
 
 describe("Scan API — Input Validation", () => {
-  const validPng = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScAAAAAElFTkSuQmCC";
-  const validJpeg = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/wAARC";
+  const validPng =
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScAAAAAElFTkSuQmCC";
+  const validJpeg =
+    "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/wAARC";
 
   it("rejects a missing imageBase64", () => {
     const result = validateScanInput(undefined, "test.png");
@@ -157,7 +156,7 @@ describe("Scan API — Input Validation", () => {
   });
 
   it("sanitizes shell-special characters from filename", () => {
-    const result = validateScanInput(validPng, 'file|name?.png');
+    const result = validateScanInput(validPng, "file|name?.png");
     expect(result.valid).toBe(true);
     expect(result.safeFilename).not.toContain("|");
     expect(result.safeFilename).not.toContain("?");

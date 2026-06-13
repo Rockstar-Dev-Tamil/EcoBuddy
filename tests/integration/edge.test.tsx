@@ -26,7 +26,7 @@ describe("State Clamping and Edge Cases", () => {
         description: "Solar offset action",
         carbon_offset: 10.0,
         co2_emission: 0,
-        xp_earned: 10
+        xp_earned: 10,
       });
     }
 
@@ -40,7 +40,7 @@ describe("State Clamping and Edge Cases", () => {
         description: "Heavy car drive",
         carbon_offset: -10.0,
         co2_emission: 15.0,
-        xp_earned: 0
+        xp_earned: 0,
       });
     }
 

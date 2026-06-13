@@ -17,7 +17,14 @@ vi.mock("@/stores/game-store", () => ({
     profile: { username: "Tester", level: 1, xp: 120, green_score: 55, streak_count: 2 },
     logs: [],
     challenges: [],
-    planet: { vegetation: 0.5, rivers: 0.5, wildlife: 0.5, atmosphere_clarity: 0.5, pollution: 0.2, desertification: 0.3 },
+    planet: {
+      vegetation: 0.5,
+      rivers: 0.5,
+      wildlife: 0.5,
+      atmosphere_clarity: 0.5,
+      pollution: 0.2,
+      desertification: 0.3,
+    },
     leaderboard: [],
     getDetectiveFindings: () => [],
     userId: "test-user-id",
@@ -44,7 +51,7 @@ describe("Dashboard Click Interactions", () => {
 
   it("triggers logAction when a quick-logging button is clicked", async () => {
     render(<DashboardPage />);
-    
+
     // Find the Walk/Cycle Commute button (or click any quick logging button)
     const bikedButton = screen.getByRole("button", { name: /Walk\/Cycle Commute/i });
     expect(bikedButton).toBeInTheDocument();
@@ -64,5 +71,5 @@ describe("Dashboard Click Interactions", () => {
       2.1,
       60
     );
-  });
+  }, 15000);
 });

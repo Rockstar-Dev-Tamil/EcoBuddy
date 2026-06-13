@@ -7,19 +7,43 @@ const getIsGeminiConfigured = (apiKey: string | undefined) => {
 
 // Extracted keyword reply logic from POST route for isolated testing
 const getFallbackReply = (message: string) => {
-  let reply = "I am processing your query. That seems like a solid way to optimize your carbon footprint! Try reducing your daily electric consumption or opting for public transit.";
+  let reply =
+    "I am processing your query. That seems like a solid way to optimize your carbon footprint! Try reducing your daily electric consumption or opting for public transit.";
   const msgLower = message.toLowerCase();
-  
-  if (msgLower.includes("order food") || msgLower.includes("delivery") || msgLower.includes("eat") || msgLower.includes("dinner")) {
-    reply = "Cooking at home would reduce your emissions by approximately 1.8 kg CO₂ compared to food delivery. Based on your logs, food transport is a key contributor to your footprint this week. Would you like a quick green recipe suggestion?";
-  } else if (msgLower.includes("travel") || msgLower.includes("car") || msgLower.includes("transport") || msgLower.includes("drive")) {
-    reply = "Switching to public transit or cycling for trips under 5km cuts carbon emissions by up to 85%. Your weekly transit footprint is currently 12.4 kg CO₂. Consider logging a bicycle ride tomorrow!";
-  } else if (msgLower.includes("electricity") || msgLower.includes("appliance") || msgLower.includes("ac") || msgLower.includes("energy")) {
-    reply = "High electricity usage detected in your logs (3.2 kg CO₂ yesterday). Setting your thermostat just 2°C higher or unplugging idle appliances can save about 1.2 kg CO₂ daily and reduce your utility bill.";
-  } else if (msgLower.includes("plant") || msgLower.includes("vegetation") || msgLower.includes("3d")) {
-    reply = "Your 3D virtual planet is a living reflection of your habits. Planting trees by logging green actions (like biking or recycling) increases vegetation. High electricity spikes activate pollution smog, which can desertify terrain.";
+
+  if (
+    msgLower.includes("order food") ||
+    msgLower.includes("delivery") ||
+    msgLower.includes("eat") ||
+    msgLower.includes("dinner")
+  ) {
+    reply =
+      "Cooking at home would reduce your emissions by approximately 1.8 kg CO₂ compared to food delivery. Based on your logs, food transport is a key contributor to your footprint this week. Would you like a quick green recipe suggestion?";
+  } else if (
+    msgLower.includes("travel") ||
+    msgLower.includes("car") ||
+    msgLower.includes("transport") ||
+    msgLower.includes("drive")
+  ) {
+    reply =
+      "Switching to public transit or cycling for trips under 5km cuts carbon emissions by up to 85%. Your weekly transit footprint is currently 12.4 kg CO₂. Consider logging a bicycle ride tomorrow!";
+  } else if (
+    msgLower.includes("electricity") ||
+    msgLower.includes("appliance") ||
+    msgLower.includes("ac") ||
+    msgLower.includes("energy")
+  ) {
+    reply =
+      "High electricity usage detected in your logs (3.2 kg CO₂ yesterday). Setting your thermostat just 2°C higher or unplugging idle appliances can save about 1.2 kg CO₂ daily and reduce your utility bill.";
+  } else if (
+    msgLower.includes("plant") ||
+    msgLower.includes("vegetation") ||
+    msgLower.includes("3d")
+  ) {
+    reply =
+      "Your 3D virtual planet is a living reflection of your habits. Planting trees by logging green actions (like biking or recycling) increases vegetation. High electricity spikes activate pollution smog, which can desertify terrain.";
   }
-  
+
   return reply;
 };
 

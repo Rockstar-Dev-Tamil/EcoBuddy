@@ -56,10 +56,12 @@ describe("Database Resilience & Offline Guards", () => {
     expect(screen.getByRole("alert")).toBeInTheDocument();
     expect(screen.getByText("Database Offline")).toBeInTheDocument();
     expect(screen.getByText(/Supabase environment variables are missing/i)).toBeInTheDocument();
-    
+
     // Assert normal login/signup buttons and separators are not displayed
     expect(screen.queryByRole("button", { name: /continue with google/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /send verification code/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /send verification code/i })
+    ).not.toBeInTheDocument();
     vi.useRealTimers();
   });
 
@@ -76,7 +78,7 @@ describe("Database Resilience & Offline Guards", () => {
     // Warning text should not be present
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(screen.queryByText("Database Offline")).not.toBeInTheDocument();
-    
+
     // Interactive login elements should be present
     expect(screen.getByRole("button", { name: /continue with google/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /send verification code/i })).toBeInTheDocument();

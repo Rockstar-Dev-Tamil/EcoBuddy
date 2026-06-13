@@ -15,7 +15,7 @@ import {
   classifyDetectiveSeverity,
   aggregateCategoryTotals,
   XP_PER_LEVEL,
-} from "../src/lib/carbon-utils";
+} from "@/lib/carbon-utils";
 
 // ---------------------------------------------------------------------------
 // calculateXPLevel
@@ -229,6 +229,13 @@ describe("aggregateCategoryTotals", () => {
 
   it("returns all-zero record for an empty log array", () => {
     const totals = aggregateCategoryTotals([]);
-    expect(totals).toEqual({ food: 0, transportation: 0, electricity: 0, shopping: 0, water: 0, waste: 0 });
+    expect(totals).toEqual({
+      food: 0,
+      transportation: 0,
+      electricity: 0,
+      shopping: 0,
+      water: 0,
+      waste: 0,
+    });
   });
 });

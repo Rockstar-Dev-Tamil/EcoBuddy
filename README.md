@@ -75,11 +75,39 @@ Google Gemini        Supabase
 
 ---
 
+## 🛠️ Local Installation & Usage
+
+Follow these steps to run EcoBuddy AI locally:
+
+### 1. Install Dependencies
+```bash
+npm install
+```
+
+### 2. Configure Environment Variables
+Create a `.env.local` file in the root directory and configure the following variables:
+```env
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-public-anon-key
+
+# Gemini API Configuration
+GEMINI_API_KEY=your-gemini-api-key
+```
+
+### 3. Run Development Server
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+---
+
 ## 🛡️ Code Quality & Validation
 
 EcoBuddy AI is engineered to be highly readable, maintainable, and resilient to bugs. 
 * **Clean Code:** Core business logic is isolated into pure utility functions, while UI components remain highly modular.
-* **Continuous Integration:** Every push to `main` must pass a rigorous GitHub Actions pipeline featuring **80+ Vitest unit/integration tests**, strict `tsc` type-checking, aggressive ESLint linting, and a successful production build.
+* **Continuous Integration:** Every push to `main` must pass a rigorous GitHub Actions pipeline featuring **95+ Vitest unit/integration tests**, strict `tsc` type-checking, aggressive ESLint linting, and a successful production build.
 
 > **Read more about our engineering standards in [docs/code-quality.md](docs/code-quality.md).**
 
@@ -93,6 +121,11 @@ For engineers and contributors, every technical system inside EcoBuddy AI is tho
 * 🏗️ **[Backend & Data Architecture (docs/architecture.md)](docs/architecture.md):** Learn about our Zustand global store optimizations, React Three Fiber render loops, modular Domain-Driven Design (DDD), and seamless fallback logic when Supabase is offline.
 * 🔌 **[API Documentation (docs/api.md)](docs/api.md):** Complete schemas for every serverless endpoint. Read exactly how we invoke the Gemini Vision API, execute JSON parsing, securely sanitize user inputs, and process multipart form uploads.
 * 🛡️ **[Code Quality & Validation (docs/code-quality.md)](docs/code-quality.md):** Discover how we maintain a pristine codebase using aggressive ESLint rules, 100% strict TypeScript, and an 80+ test Vitest integration suite via GitHub Actions CI/CD.
+* 🗄️ **[Database Schema (docs/database-schema.md)](docs/database-schema.md):** Learn about our Supabase tables, row-level security (RLS), constraints, and triggers.
+* 🚀 **[Deployment (docs/deployment.md)](docs/deployment.md):** Instructions for hosting, environment variable sets, database sql setups, and offline previews.
+* 🧪 **[Testing Framework (docs/testing.md)](docs/testing.md):** Learn about our unit, integration, E2E browser tests, and test-coverage parameters.
+* ♿ **[Accessibility Standards (docs/accessibility.md)](docs/accessibility.md):** Detailed audits on ARIA accessibility labels, landmarks, and color contrast.
+* 🔒 **[Security Architecture (docs/security.md)](docs/security.md):** Audit details on DOMPurify input sanitizations, rate-limiting bucket sizes, and HTTPS headers.
 
 ---
 
@@ -114,6 +147,7 @@ EcoBuddy AI is designed to evolve into a complete AI-powered sustainability ecos
 
 ## 🌱 Long-Term Vision
 
-By combining the intelligence of Google Gemini with visualization and gamification, EcoBuddy AI seeks to help millions of people make better choices and collectively build a greener future.
+By combining the intelligence of Google Gemini with visualization and gamification, EcoBuddy AI seeks to help millions of people make better choices and collectively build a collectively greener future.
 
 > **"See the future you're creating — and take action to build a greener one."**
+

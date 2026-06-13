@@ -39,6 +39,11 @@ const nextConfig: NextConfig = {
         value: cspDirectives,
       },
       {
+        // Enforce secure HTTPS connection
+        key: "Strict-Transport-Security",
+        value: "max-age=63072000; includeSubDomains; preload",
+      },
+      {
         // Prevent MIME type sniffing
         key: "X-Content-Type-Options",
         value: "nosniff",

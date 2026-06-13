@@ -14,7 +14,14 @@ vi.mock("next/navigation", () => ({
 // Mock game store context
 vi.mock("@/stores/game-store", () => ({
   useGame: () => ({
-    profile: { username: "Tester", level: 2, xp: 1200, green_score: 64, streak_count: 5, avatar_url: "" },
+    profile: {
+      username: "Tester",
+      level: 2,
+      xp: 1200,
+      green_score: 64,
+      streak_count: 5,
+      avatar_url: "",
+    },
     userId: "test-user-id",
     isLoading: false,
   }),
@@ -56,7 +63,7 @@ describe("Navbar Navigation Layout UI", () => {
 
     // Verify streak badge is displayed
     expect(screen.getByText("5 Day Streak")).toBeInTheDocument();
-    
+
     // Verify level indicators are present
     expect(screen.getByText("Lvl 2")).toBeInTheDocument();
     expect(screen.getByText("Sprout")).toBeInTheDocument();

@@ -28,18 +28,18 @@ describe("MockDB Core Logic", () => {
 
   it("computes planet factors when logging sustainable actions", () => {
     const initialPlanet = MockDB.getPlanetState();
-    
+
     // Log active transportation offset
     const log = MockDB.addLog({
       category: "transport",
       description: "Bycled to work",
       carbon_offset: 2.5,
       co2_emission: 0,
-      xp_earned: 60
+      xp_earned: 60,
     });
 
     expect(log.id).toBeDefined();
-    
+
     // Check that planet vegetation or atmosphere clarity increased
     const updatedPlanet = MockDB.getPlanetState();
     expect(updatedPlanet.pollution).toBeLessThan(initialPlanet.pollution);

@@ -5,37 +5,43 @@ import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useGame } from "@/stores/game-store";
 import { calculateXPLevel } from "@/lib/carbon-utils";
-import { 
-  Flame, 
-  Leaf, 
-  Award, 
-  Zap, 
-  AlertTriangle, 
-  CheckCircle, 
-  ArrowRight, 
-  Plus, 
-  Globe, 
-  Trophy, 
-  Sparkles, 
-  ChevronRight, 
+import { GoalsWidget } from "@/components/goals-widget";
+import {
+  Flame,
+  Leaf,
+  Award,
+  Zap,
+  AlertTriangle,
+  CheckCircle,
+  ArrowRight,
+  Plus,
+  Globe,
+  Trophy,
+  Sparkles,
+  ChevronRight,
   Compass,
   ArrowUp,
   Activity,
-  FlameKindling
+  FlameKindling,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Dynamically import Recharts — it's heavy (~200 kB) and only needed on chart tab
-const DynamicBarChart = dynamic(
-  () => import("recharts").then((mod) => mod.BarChart),
-  { ssr: false, loading: () => <div className="w-full h-52 animate-pulse bg-white/[0.02] rounded-xl" /> }
-);
+const DynamicBarChart = dynamic(() => import("recharts").then((mod) => mod.BarChart), {
+  ssr: false,
+  loading: () => <div className="w-full h-52 animate-pulse bg-white/[0.02] rounded-xl" />,
+});
 const DynamicBar = dynamic(() => import("recharts").then((m) => m.Bar), { ssr: false });
 const DynamicXAxis = dynamic(() => import("recharts").then((m) => m.XAxis), { ssr: false });
 const DynamicYAxis = dynamic(() => import("recharts").then((m) => m.YAxis), { ssr: false });
-const DynamicCartesianGrid = dynamic(() => import("recharts").then((m) => m.CartesianGrid), { ssr: false });
+const DynamicCartesianGrid = dynamic(() => import("recharts").then((m) => m.CartesianGrid), {
+  ssr: false,
+});
 const DynamicTooltip = dynamic(() => import("recharts").then((m) => m.Tooltip), { ssr: false });
-const DynamicResponsiveContainer = dynamic(() => import("recharts").then((m) => m.ResponsiveContainer), { ssr: false });
+const DynamicResponsiveContainer = dynamic(
+  () => import("recharts").then((m) => m.ResponsiveContainer),
+  { ssr: false }
+);
 const DynamicCell = dynamic(() => import("recharts").then((m) => m.Cell), { ssr: false });
 
 export default function DashboardPage() {
@@ -62,13 +68,45 @@ export default function DashboardPage() {
 
   // Quick logging button triggers (minimizes manual logging friction)
   const quickLogs = [
-    { name: "Walk/Cycle Commute", category: "transport", desc: "Rode bicycle instead of car drive", co2: 0.0, offset: 2.1, xp: 60, icon: Compass },
-    { name: "Vegetarian Meal", category: "diet", desc: "Had plant-based organic meal", co2: 0.3, offset: 1.5, xp: 50, icon: Leaf },
-    { name: "Unplugged Idle Setup", category: "energy", desc: "Turned off standby appliances", co2: 0.1, offset: 0.8, xp: 40, icon: Zap },
-    { name: "Recycled Plastic/Can", category: "waste", desc: "Sorted and recycled metals & polymers", co2: 0.0, offset: 0.6, xp: 30, icon: Activity },
+    {
+      name: "Walk/Cycle Commute",
+      category: "transport",
+      desc: "Rode bicycle instead of car drive",
+      co2: 0.0,
+      offset: 2.1,
+      xp: 60,
+      icon: Compass,
+    },
+    {
+      name: "Vegetarian Meal",
+      category: "diet",
+      desc: "Had plant-based organic meal",
+      co2: 0.3,
+      offset: 1.5,
+      xp: 50,
+      icon: Leaf,
+    },
+    {
+      name: "Unplugged Idle Setup",
+      category: "energy",
+      desc: "Turned off standby appliances",
+      co2: 0.1,
+      offset: 0.8,
+      xp: 40,
+      icon: Zap,
+    },
+    {
+      name: "Recycled Plastic/Can",
+      category: "waste",
+      desc: "Sorted and recycled metals & polymers",
+      co2: 0.0,
+      offset: 0.6,
+      xp: 30,
+      icon: Activity,
+    },
   ];
 
-  const handleQuickLog = async (ql: typeof quickLogs[0]) => {
+  const handleQuickLog = async (ql: (typeof quickLogs)[0]) => {
     setIsLoggingAction(ql.name);
     // Simulate minor transition delay for game feel
     await new Promise((resolve) => setTimeout(resolve, 800));
@@ -91,10 +129,13 @@ export default function DashboardPage() {
   }, [logs]);
 
   // Aggregate emissions & offsets (memoized)
-  const { totalEmissions, totalOffsets } = useMemo(() => ({
-    totalEmissions: logs.reduce((sum, l) => sum + l.co2_emission, 0).toFixed(1),
-    totalOffsets: logs.reduce((sum, l) => sum + l.carbon_offset, 0).toFixed(1),
-  }), [logs]);
+  const { totalEmissions, totalOffsets } = useMemo(
+    () => ({
+      totalEmissions: logs.reduce((sum, l) => sum + l.co2_emission, 0).toFixed(1),
+      totalOffsets: logs.reduce((sum, l) => sum + l.carbon_offset, 0).toFixed(1),
+    }),
+    [logs]
+  );
 
   // Carbon Detective Findings (memoized)
   const findings = useMemo(() => getDetectiveFindings(), [getDetectiveFindings]);
@@ -103,9 +144,12 @@ export default function DashboardPage() {
   const userRank = React.useMemo(() => {
     if (!profile || !leaderboard) return { rank: 1, rank_movement: 0 };
     const entry = leaderboard.find(
-      (e) => e.profile_id === profile.id || e.username.toLowerCase() === profile.username.toLowerCase()
+      (e) =>
+        e.profile_id === profile.id || e.username.toLowerCase() === profile.username.toLowerCase()
     );
-    return entry ? { rank: entry.rank, rank_movement: entry.rank_movement } : { rank: 3, rank_movement: 1 };
+    return entry
+      ? { rank: entry.rank, rank_movement: entry.rank_movement }
+      : { rank: 3, rank_movement: 1 };
   }, [profile, leaderboard]);
 
   // Redirect to AI Twin with prefilled query
@@ -159,26 +203,28 @@ export default function DashboardPage() {
 
   const cardVariants = {
     hidden: { opacity: 0, y: 15 },
-    show: { 
-      opacity: 1, 
+    show: {
+      opacity: 1,
       y: 0,
       transition: {
         type: "spring" as const,
         stiffness: 100,
-        damping: 15
-      }
+        damping: 15,
+      },
     },
   };
 
   return (
     <div className="flex-1 flex flex-col w-full max-w-7xl mx-auto px-1 py-2 lg:py-4 select-none">
-      
       {/* Introduction Banner */}
       <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="font-cabinet font-extrabold text-2xl lg:text-3xl text-white tracking-tight flex items-center gap-2">
-            Welcome back, <span className="bg-gradient-to-r from-accent to-secondary bg-clip-text text-transparent">{profile.username}</span>
-            <motion.span 
+            Welcome back,{" "}
+            <span className="bg-gradient-to-r from-accent to-secondary bg-clip-text text-transparent">
+              {profile.username}
+            </span>
+            <motion.span
               animate={{ rotate: [0, 15, -10, 15, 0] }}
               transition={{ repeat: Infinity, duration: 2.5, repeatDelay: 1 }}
               className="inline-block origin-bottom-right"
@@ -187,34 +233,38 @@ export default function DashboardPage() {
             </motion.span>
           </h1>
           <p className="text-xs text-zinc-400 mt-1">
-            Monitor your ecological metrics, complete daily challenges, and coordinate with your AI twin.
+            Monitor your ecological metrics, complete daily challenges, and coordinate with your AI
+            twin.
           </p>
         </div>
-        
+
         {/* Synchronized indicator */}
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/5 text-[10px] text-zinc-400 font-mono">
-          <span className={`w-1.5 h-1.5 rounded-full animate-ping ${userId ? "bg-[#00E676]" : "bg-[#ffc107]"}`} />
+          <span
+            className={`w-1.5 h-1.5 rounded-full animate-ping ${userId ? "bg-[#00E676]" : "bg-[#ffc107]"}`}
+          />
           <span>{userId ? "Realtime Database Connected" : "Preview Ledger (Mock Fallback)"}</span>
         </div>
       </div>
 
       {/* Dynamic Bento Grid Layout */}
-      <motion.div 
+      <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="show"
         className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-auto md:auto-rows-[minmax(190px,auto)]"
       >
-        
         {/* CARD 1: Green Score Hero (Spans 1 col, 2 rows) */}
-        <motion.div 
+        <motion.div
           variants={cardVariants}
           className="md:col-span-1 md:row-span-2 glass-panel p-6 flex flex-col justify-between relative overflow-hidden group hover:border-accent/30 hover:shadow-[0_0_30px_rgba(0,230,118,0.12)] transition-all duration-300"
         >
           {/* Subtle nature plant overlay */}
           <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-accent/5 rounded-full blur-[40px] pointer-events-none group-hover:bg-accent/10 transition-colors duration-500" />
-          <div className="absolute top-4 left-4 text-[10px] text-zinc-500 uppercase font-bold tracking-widest">Planetary Rating</div>
-          
+          <div className="absolute top-4 left-4 text-[10px] text-zinc-500 uppercase font-bold tracking-widest">
+            Planetary Rating
+          </div>
+
           {/* Circular Graph */}
           <div className="flex-1 flex flex-col items-center justify-center py-6">
             <div className="relative w-36 h-36 flex items-center justify-center">
@@ -245,30 +295,41 @@ export default function DashboardPage() {
                 <span className="font-outfit font-extrabold text-4xl text-white tracking-tighter text-glow">
                   {profile.green_score}
                 </span>
-                <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">Green Index</span>
+                <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">
+                  Green Index
+                </span>
               </div>
             </div>
-            
+
             <div className="text-center mt-4 px-2">
               <span className="inline-block px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-[10px] text-accent font-bold font-syne uppercase tracking-wider">
                 Ecosystem Healthy
               </span>
-              <p className="text-xs text-zinc-400 mt-2.5 leading-relaxed max-w-[240px]">
-                Your carbon offset logs are outpacing your emissions by <span className="text-white font-semibold">{totalOffsets} kg</span>. Excellent progress!
+              <p className="text-xs text-zinc-300 mt-2.5 leading-relaxed max-w-[240px]">
+                You&apos;ve saved{" "}
+                <span className="text-white font-bold text-glow">{totalOffsets} kg CO₂</span> this
+                month!
               </p>
+              <div className="mt-3 p-2 rounded-xl bg-white/[0.02] border border-white/5 text-[10px] text-zinc-400">
+                🌱 <span className="text-accent font-semibold">Offset Tip:</span> Plant{" "}
+                <span className="text-white font-bold">
+                  {Math.max(1, Math.round(Number(totalEmissions) / 20.5))}
+                </span>{" "}
+                {Math.round(Number(totalEmissions) / 20.5) === 1 ? "tree" : "trees"} to offset your
+                monthly emissions.
+              </div>
             </div>
           </div>
 
           <div className="border-t border-white/5 pt-4 text-center">
             <span className="text-[10px] font-semibold text-zinc-500">
-              Next level projection: Level {profile.level + 1} ({getLevelName(profile.level + 1)})
+              Next Rank: {getLevelName(profile.level + 1)} (Level {profile.level + 1})
             </span>
           </div>
         </motion.div>
 
-
         {/* CARD 2: Weekly Emissions Chart (Spans 2 cols, 2 rows) */}
-        <motion.div 
+        <motion.div
           variants={cardVariants}
           className="md:col-span-2 md:row-span-2 glass-panel p-6 flex flex-col justify-between group hover:border-accent/20 transition-all duration-300"
         >
@@ -283,7 +344,11 @@ export default function DashboardPage() {
             </div>
 
             {/* Toggle view controllers */}
-            <div className="flex bg-zinc-950/60 p-1 rounded-lg border border-zinc-800 self-start sm:self-center shrink-0" role="tablist" aria-label="Ledger View">
+            <div
+              className="flex bg-zinc-950/60 p-1 rounded-lg border border-zinc-800 self-start sm:self-center shrink-0"
+              role="tablist"
+              aria-label="Ledger View"
+            >
               <button
                 onClick={() => setActiveTab("chart")}
                 role="tab"
@@ -303,7 +368,9 @@ export default function DashboardPage() {
                 aria-controls="tab-panel-activity"
                 id="tab-btn-activity"
                 className={`px-3 py-1 rounded-md text-[10px] font-bold font-syne uppercase tracking-wider transition-colors cursor-pointer ${
-                  activeTab === "activity" ? "bg-accent text-black" : "text-zinc-400 hover:text-white"
+                  activeTab === "activity"
+                    ? "bg-accent text-black"
+                    : "text-zinc-400 hover:text-white"
                 }`}
               >
                 Recent Activity
@@ -315,7 +382,7 @@ export default function DashboardPage() {
           <div className="flex-1 min-h-[220px] flex items-center justify-center">
             <AnimatePresence mode="wait">
               {activeTab === "chart" ? (
-                <motion.div 
+                <motion.div
                   key="chart"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -324,22 +391,56 @@ export default function DashboardPage() {
                 >
                   <div className="flex justify-around items-center bg-white/[0.02] border border-white/5 rounded-xl p-4 mt-2 mb-4 text-center">
                     <div>
-                      <span className="text-[9px] text-zinc-500 uppercase font-bold tracking-wider block mb-1">Today&apos;s Emissions</span>
+                      <span className="text-[9px] text-zinc-500 uppercase font-bold tracking-wider block mb-1">
+                        Today&apos;s Emissions
+                      </span>
                       <span className="text-xl font-outfit font-extrabold text-white">
-                        {totalEmissions} <span className="text-sm font-normal text-zinc-500">kg</span>
+                        {totalEmissions}{" "}
+                        <span className="text-sm font-normal text-zinc-500">kg</span>
                       </span>
                     </div>
                     <div className="w-[1px] h-8 bg-zinc-800" />
                     <div className="relative w-12 h-12 flex items-center justify-center">
                       <svg className="w-full h-full transform -rotate-90">
-                        <circle cx="24" cy="24" r="20" className="stroke-zinc-800/60 fill-transparent" strokeWidth="4" />
-                        <circle cx="24" cy="24" r="20" className="stroke-accent fill-transparent transition-all duration-1000 ease-out" strokeWidth="4" strokeDasharray="125.6" strokeDashoffset={125.6 - (Math.min(100, (Number(totalOffsets) / (Number(totalEmissions) || 1)) * 100) / 100) * 125.6} strokeLinecap="round" />
+                        <circle
+                          cx="24"
+                          cy="24"
+                          r="20"
+                          className="stroke-zinc-800/60 fill-transparent"
+                          strokeWidth="4"
+                        />
+                        <circle
+                          cx="24"
+                          cy="24"
+                          r="20"
+                          className="stroke-accent fill-transparent transition-all duration-1000 ease-out"
+                          strokeWidth="4"
+                          strokeDasharray="125.6"
+                          strokeDashoffset={
+                            125.6 -
+                            (Math.min(
+                              100,
+                              (Number(totalOffsets) / (Number(totalEmissions) || 1)) * 100
+                            ) /
+                              100) *
+                              125.6
+                          }
+                          strokeLinecap="round"
+                        />
                       </svg>
-                      <span className="absolute text-[10px] font-bold text-accent">{Math.min(100, Math.round((Number(totalOffsets) / (Number(totalEmissions) || 1)) * 100))}%</span>
+                      <span className="absolute text-[10px] font-bold text-accent">
+                        {Math.min(
+                          100,
+                          Math.round((Number(totalOffsets) / (Number(totalEmissions) || 1)) * 100)
+                        )}
+                        %
+                      </span>
                     </div>
                     <div className="w-[1px] h-8 bg-zinc-800" />
                     <div>
-                      <span className="text-[9px] text-zinc-500 uppercase font-bold tracking-wider block mb-1">Weekly Trend</span>
+                      <span className="text-[9px] text-zinc-500 uppercase font-bold tracking-wider block mb-1">
+                        Weekly Trend
+                      </span>
                       <span className="text-sm font-outfit font-bold text-secondary flex items-center justify-center gap-1">
                         <ArrowUp className="w-3 h-3 rotate-180" /> 12%
                       </span>
@@ -348,33 +449,43 @@ export default function DashboardPage() {
 
                   <div className="w-full flex-1 min-h-[140px]">
                     <DynamicResponsiveContainer width="100%" height="100%">
-                      <DynamicBarChart data={chartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                      <DynamicBarChart
+                        data={chartData}
+                        margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
+                      >
                         <defs>
                           <linearGradient id="barGlow" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stopColor="#00E676" stopOpacity={0.85} />
                             <stop offset="100%" stopColor="#1DE9B6" stopOpacity={0.25} />
                           </linearGradient>
                         </defs>
-                        <DynamicCartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" />
-                        <DynamicXAxis dataKey="name" stroke="#666" style={{ fontSize: 10, fontWeight: 600 }} />
+                        <DynamicCartesianGrid
+                          strokeDasharray="3 3"
+                          stroke="rgba(255,255,255,0.03)"
+                        />
+                        <DynamicXAxis
+                          dataKey="name"
+                          stroke="#666"
+                          style={{ fontSize: 10, fontWeight: 600 }}
+                        />
                         <DynamicYAxis stroke="#666" style={{ fontSize: 10, fontWeight: 600 }} />
                         <DynamicTooltip
                           cursor={{ fill: "rgba(255,255,255,0.02)", radius: 4 }}
-                          contentStyle={{ 
-                            backgroundColor: "#0a0f0a", 
-                            borderColor: "rgba(255, 255, 255, 0.08)", 
-                            color: "#fff", 
+                          contentStyle={{
+                            backgroundColor: "#0a0f0a",
+                            borderColor: "rgba(255, 255, 255, 0.08)",
+                            color: "#fff",
                             borderRadius: 12,
                             fontSize: 11,
                             fontFamily: "var(--font-sans)",
-                            boxShadow: "0 10px 25px rgba(0,0,0,0.5)"
+                            boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
                           }}
                           labelClassName="font-syne font-bold text-accent mb-1"
                         />
                         <DynamicBar dataKey="CO2" fill="url(#barGlow)" radius={[6, 6, 0, 0]}>
                           {chartData.map((entry, idx) => (
-                            <DynamicCell 
-                              key={`cell-${idx}`} 
+                            <DynamicCell
+                              key={`cell-${idx}`}
                               className="hover:opacity-100 transition-opacity duration-300"
                               style={{ filter: "drop-shadow(0 0 4px rgba(0, 230, 118, 0.2))" }}
                             />
@@ -383,8 +494,8 @@ export default function DashboardPage() {
                       </DynamicBarChart>
                     </DynamicResponsiveContainer>
                   </div>
-                  
-                  <button 
+
+                  <button
                     onClick={() => router.push("/carbon-tracker")}
                     className="w-full mt-4 py-2 bg-accent/10 hover:bg-accent/20 border border-accent/20 text-accent rounded-xl text-xs font-syne font-bold flex items-center justify-center gap-1.5 transition-all duration-300"
                   >
@@ -393,7 +504,7 @@ export default function DashboardPage() {
                   </button>
                 </motion.div>
               ) : (
-                <motion.div 
+                <motion.div
                   key="activity"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -401,37 +512,61 @@ export default function DashboardPage() {
                   className="w-full flex flex-col gap-2 max-h-[220px] overflow-y-auto pr-1 no-scrollbar"
                 >
                   {logs.length === 0 ? (
-                    <div className="text-zinc-500 text-xs text-center py-10">No recent activity logs found. Try a quick logging shortcut below!</div>
+                    <div className="text-zinc-500 text-xs text-center py-10">
+                      No recent activity logs found. Try a quick logging shortcut below!
+                    </div>
                   ) : (
-                    logs.slice().reverse().slice(0, 4).map((log) => (
-                      <div 
-                        key={log.id} 
-                        className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className={`w-2 h-2 rounded-full ${
-                            log.category === "transport" ? "bg-cyan-400" :
-                            log.category === "diet" ? "bg-emerald-400" :
-                            log.category === "energy" ? "bg-amber-400" : "bg-purple-400"
-                          }`} />
-                          <div>
-                            <span className="text-xs font-semibold text-zinc-200 block">{log.description}</span>
-                            <span className="text-[9px] text-zinc-500 font-mono mt-0.5 block capitalize">
-                              {log.category} • {new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    logs
+                      .slice()
+                      .reverse()
+                      .slice(0, 4)
+                      .map((log) => (
+                        <div
+                          key={log.id}
+                          className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <span
+                              className={`w-2 h-2 rounded-full ${
+                                log.category === "transport"
+                                  ? "bg-cyan-400"
+                                  : log.category === "diet"
+                                    ? "bg-emerald-400"
+                                    : log.category === "energy"
+                                      ? "bg-amber-400"
+                                      : "bg-purple-400"
+                              }`}
+                            />
+                            <div>
+                              <span className="text-xs font-semibold text-zinc-200 block">
+                                {log.description}
+                              </span>
+                              <span className="text-[9px] text-zinc-500 font-mono mt-0.5 block capitalize">
+                                {log.category} •{" "}
+                                {new Date(log.created_at).toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="text-right shrink-0">
+                            {log.carbon_offset > 0 ? (
+                              <span className="text-xs font-bold text-accent font-mono">
+                                -{log.carbon_offset} kg Offset
+                              </span>
+                            ) : (
+                              <span className="text-xs font-bold text-zinc-400 font-mono">
+                                +{log.co2_emission} kg CO₂
+                              </span>
+                            )}
+                            <span className="block text-[8px] font-bold text-yellow-500">
+                              +{log.xp_earned} XP
                             </span>
                           </div>
                         </div>
-
-                        <div className="text-right shrink-0">
-                          {log.carbon_offset > 0 ? (
-                            <span className="text-xs font-bold text-accent font-mono">-{log.carbon_offset} kg Offset</span>
-                          ) : (
-                            <span className="text-xs font-bold text-zinc-400 font-mono">+{log.co2_emission} kg CO₂</span>
-                          )}
-                          <span className="block text-[8px] font-bold text-yellow-500">+{log.xp_earned} XP</span>
-                        </div>
-                      </div>
-                    ))
+                      ))
                   )}
                 </motion.div>
               )}
@@ -439,39 +574,48 @@ export default function DashboardPage() {
           </div>
         </motion.div>
 
-
         {/* CARD 3: XP Progress Card (Spans 1 col, 1 row) */}
-        <motion.div 
+        <motion.div
           variants={cardVariants}
           className="md:col-span-1 glass-panel p-5 flex flex-col justify-between group hover:border-accent/20 transition-all duration-300"
         >
           <div className="flex justify-between items-start">
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Growth Progress</span>
+            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+              Growth Progress
+            </span>
             <Award className="w-4 h-4 text-accent" />
           </div>
           <div>
             <div className="flex items-baseline gap-1.5 mt-2">
-              <span className="text-2xl font-outfit font-extrabold text-white">Level {profile.level}</span>
-              <span className="text-[10px] text-zinc-400 font-semibold font-syne uppercase">({getLevelName(profile.level)})</span>
+              <span className="text-2xl font-outfit font-extrabold text-white">
+                Level {profile.level}
+              </span>
+              <span className="text-[10px] text-zinc-400 font-semibold font-syne uppercase">
+                ({getLevelName(profile.level)})
+              </span>
             </div>
-            <div className="w-full bg-zinc-800/80 h-1.5 rounded-full overflow-hidden mt-2"
+            <div
+              className="w-full bg-zinc-800/80 h-1.5 rounded-full overflow-hidden mt-2"
               role="progressbar"
               aria-valuenow={profile.xp % 1000}
               aria-valuemin={0}
               aria-valuemax={1000}
               aria-label={`XP Progress: ${profile.xp % 1000} of 1000`}
             >
-              <div 
-                className="h-full bg-gradient-to-r from-accent to-secondary rounded-full transition-all duration-500" 
+              <div
+                className="h-full bg-gradient-to-r from-accent to-secondary rounded-full transition-all duration-500"
                 style={{ width: `${xpProgress}%` }}
               />
             </div>
             <div className="flex justify-between items-center text-[9px] text-zinc-500 font-semibold mt-1.5 font-mono">
               <span>{profile.xp % 1000} / 1000 XP</span>
-              <span className="text-accent">{xpRemaining} XP to Lvl {profile.level + 1}</span>
+              <span className="text-accent">
+                {xpRemaining} XP to Lvl {profile.level + 1}
+              </span>
             </div>
           </div>
-          <div className="text-[10px] text-zinc-400 bg-white/[0.02] border border-white/5 px-2.5 py-1.5 rounded-lg flex items-center justify-between"
+          <div
+            className="text-[10px] text-zinc-400 bg-white/[0.02] border border-white/5 px-2.5 py-1.5 rounded-lg flex items-center justify-between"
             role="status"
             aria-live="polite"
             aria-label="Achievement unlocked status"
@@ -484,14 +628,15 @@ export default function DashboardPage() {
           </div>
         </motion.div>
 
-
         {/* CARD 4: Streak Card (Spans 1 col, 1 row) */}
-        <motion.div 
+        <motion.div
           variants={cardVariants}
           className="md:col-span-1 glass-panel p-5 flex flex-col justify-between group hover:border-amber-500/30 hover:shadow-[0_0_30px_rgba(245,158,11,0.06)] transition-all duration-300"
         >
           <div className="flex justify-between items-start">
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Active Streak</span>
+            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+              Active Streak
+            </span>
             <Flame className="w-4 h-4 text-amber-500 fill-amber-500/20 group-hover:scale-110 transition-transform duration-300" />
           </div>
           <div>
@@ -511,19 +656,22 @@ export default function DashboardPage() {
           </div>
         </motion.div>
 
-
         {/* CARD 5: Community Rank Card (Spans 1 col, 1 row) */}
-        <motion.div 
+        <motion.div
           variants={cardVariants}
           className="md:col-span-1 glass-panel p-5 flex flex-col justify-between group hover:border-secondary/30 transition-all duration-300"
         >
           <div className="flex justify-between items-start">
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Community standing</span>
+            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+              Community standing
+            </span>
             <Trophy className="w-4 h-4 text-secondary" />
           </div>
           <div>
             <div className="flex items-center gap-1.5 mt-2">
-              <span className="text-2xl font-outfit font-extrabold text-white">Global Rank #{userRank.rank}</span>
+              <span className="text-2xl font-outfit font-extrabold text-white">
+                Global Rank #{userRank.rank}
+              </span>
               {userRank.rank_movement > 0 ? (
                 <span className="p-0.5 rounded bg-accent/20 border border-accent/20 flex items-center text-accent text-[9px] font-extrabold shrink-0">
                   <ArrowUp className="w-2.5 h-2.5" />
@@ -536,7 +684,7 @@ export default function DashboardPage() {
               Competing against global EcoBuddies
             </span>
           </div>
-          <button 
+          <button
             onClick={() => router.push("/community")}
             className="w-full py-2 bg-zinc-950/60 border border-white/5 hover:border-secondary/30 text-zinc-300 hover:text-white rounded-xl text-[10px] font-syne font-bold flex items-center justify-center gap-1 cursor-pointer transition-all duration-300"
           >
@@ -545,25 +693,32 @@ export default function DashboardPage() {
           </button>
         </motion.div>
 
-
         {/* CARD 6: Planet Preview Card (Spans 1 col, 2 rows) */}
-        <motion.div 
+        <motion.div
           variants={cardVariants}
           className="md:col-span-1 md:row-span-2 glass-panel p-6 flex flex-col justify-between group hover:border-secondary/30 hover:shadow-[0_0_30px_rgba(29,233,182,0.12)] transition-all duration-300"
         >
-          <div className="absolute top-4 left-4 text-[10px] text-zinc-500 uppercase font-bold tracking-widest">3D Planet Preview</div>
-          
+          <div className="absolute top-4 left-4 text-[10px] text-zinc-500 uppercase font-bold tracking-widest">
+            3D Planet Preview
+          </div>
+
           <div className="flex-1 flex flex-col justify-center items-center py-6">
             {/* Visual representation of 3D globe */}
             <div className="relative w-28 h-28 flex items-center justify-center my-2">
               {/* Outer atmosphere halo */}
-              <div className="absolute inset-0 rounded-full border-2 border-dashed border-secondary/20 animate-spin" style={{ animationDuration: "20s" }} />
+              <div
+                className="absolute inset-0 rounded-full border-2 border-dashed border-secondary/20 animate-spin"
+                style={{ animationDuration: "20s" }}
+              />
               {/* Core sphere */}
-              <div 
+              <div
                 className="w-20 h-20 rounded-full bg-gradient-to-tr from-emerald-950 via-teal-900 to-cyan-950 border border-secondary/30 shadow-[0_0_30px_rgba(29,233,182,0.4)] flex items-center justify-center animate-pulse"
                 style={{ animationDuration: "4s" }}
               >
-                <Globe className="w-12 h-12 text-secondary/70 animate-bounce" style={{ animationDuration: "8s" }} />
+                <Globe
+                  className="w-12 h-12 text-secondary/70 animate-bounce"
+                  style={{ animationDuration: "8s" }}
+                />
               </div>
             </div>
 
@@ -572,10 +727,15 @@ export default function DashboardPage() {
               <div>
                 <div className="flex justify-between text-[9px] font-bold text-zinc-500 uppercase tracking-wider mb-1">
                   <span>Vegetation Cover</span>
-                  <span className="text-accent font-mono">{(planet?.vegetation * 100 || 60).toFixed(0)}%</span>
+                  <span className="text-accent font-mono">
+                    {(planet?.vegetation * 100 || 60).toFixed(0)}%
+                  </span>
                 </div>
                 <div className="w-full bg-zinc-900 h-1 rounded-full overflow-hidden">
-                  <div className="h-full bg-accent" style={{ width: `${planet?.vegetation * 100 || 60}%` }} />
+                  <div
+                    className="h-full bg-accent"
+                    style={{ width: `${planet?.vegetation * 100 || 60}%` }}
+                  />
                 </div>
               </div>
 
@@ -583,10 +743,15 @@ export default function DashboardPage() {
               <div>
                 <div className="flex justify-between text-[9px] font-bold text-zinc-500 uppercase tracking-wider mb-1">
                   <span>Water Resources</span>
-                  <span className="text-secondary font-mono">{(planet?.rivers * 100 || 55).toFixed(0)}%</span>
+                  <span className="text-secondary font-mono">
+                    {(planet?.rivers * 100 || 55).toFixed(0)}%
+                  </span>
                 </div>
                 <div className="w-full bg-zinc-900 h-1 rounded-full overflow-hidden">
-                  <div className="h-full bg-secondary" style={{ width: `${planet?.rivers * 100 || 55}%` }} />
+                  <div
+                    className="h-full bg-secondary"
+                    style={{ width: `${planet?.rivers * 100 || 55}%` }}
+                  />
                 </div>
               </div>
 
@@ -594,16 +759,21 @@ export default function DashboardPage() {
               <div>
                 <div className="flex justify-between text-[9px] font-bold text-zinc-500 uppercase tracking-wider mb-1">
                   <span>Atmosphere Clarity</span>
-                  <span className="text-cyan-400 font-mono">{(planet?.atmosphere_clarity * 100 || 65).toFixed(0)}%</span>
+                  <span className="text-cyan-400 font-mono">
+                    {(planet?.atmosphere_clarity * 100 || 65).toFixed(0)}%
+                  </span>
                 </div>
                 <div className="w-full bg-zinc-900 h-1 rounded-full overflow-hidden">
-                  <div className="h-full bg-cyan-400" style={{ width: `${planet?.atmosphere_clarity * 100 || 65}%` }} />
+                  <div
+                    className="h-full bg-cyan-400"
+                    style={{ width: `${planet?.atmosphere_clarity * 100 || 65}%` }}
+                  />
                 </div>
               </div>
             </div>
           </div>
 
-          <button 
+          <button
             onClick={() => router.push("/planet")}
             className="w-full py-2.5 bg-secondary hover:bg-secondary-bright text-black font-syne font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-lg hover:shadow-secondary/25 transition-all duration-300"
           >
@@ -612,9 +782,8 @@ export default function DashboardPage() {
           </button>
         </motion.div>
 
-
         {/* CARD 7: Daily Challenges (Spans 2 cols, 2 rows) */}
-        <motion.div 
+        <motion.div
           variants={cardVariants}
           className="md:col-span-2 md:row-span-2 glass-panel p-6 flex flex-col justify-between group hover:border-accent/20 transition-all duration-300"
         >
@@ -643,11 +812,15 @@ export default function DashboardPage() {
                   }`}
                 >
                   <div className="flex items-center justify-center mt-0.5 shrink-0">
-                    <CheckCircle className={`w-4 h-4 ${ch.completed ? "text-accent fill-emerald-950/20" : "text-zinc-700"}`} />
+                    <CheckCircle
+                      className={`w-4 h-4 ${ch.completed ? "text-accent fill-emerald-950/20" : "text-zinc-700"}`}
+                    />
                   </div>
                   <div className="flex-1">
                     <div className="flex justify-between items-start gap-4">
-                      <span className={`text-xs font-bold block ${ch.completed ? "line-through text-zinc-500 font-normal" : "text-zinc-200"}`}>
+                      <span
+                        className={`text-xs font-bold block ${ch.completed ? "line-through text-zinc-500 font-normal" : "text-zinc-200"}`}
+                      >
                         {ch.title}
                       </span>
                       <span className="text-[9px] font-bold text-yellow-500 bg-yellow-500/10 border border-yellow-500/20 px-2 py-0.5 rounded-full shrink-0">
@@ -655,12 +828,12 @@ export default function DashboardPage() {
                       </span>
                     </div>
                     <p className="text-[10px] text-zinc-500 mt-0.5">{ch.description}</p>
-                    
+
                     {/* Progress Slider */}
                     <div className="flex items-center gap-2.5 mt-2.5">
                       <div className="flex-1 bg-zinc-900 h-1.5 rounded-full overflow-hidden border border-white/5">
-                        <div 
-                          className="h-full bg-accent rounded-full transition-all duration-500" 
+                        <div
+                          className="h-full bg-accent rounded-full transition-all duration-500"
                           style={{ width: `${(ch.current_value / ch.target_value) * 100}%` }}
                         />
                       </div>
@@ -675,14 +848,18 @@ export default function DashboardPage() {
           </div>
 
           <div className="border-t border-white/5 pt-4 flex justify-between items-center text-[10px] text-zinc-500 font-semibold">
-            <span>Challenges logged: {challenges.filter(c => c.completed).length} / {challenges.length} completed</span>
-            <span className="text-accent">{"Keep tracking activities to clear today's targets"}</span>
+            <span>
+              Challenges logged: {challenges.filter((c) => c.completed).length} /{" "}
+              {challenges.length} completed
+            </span>
+            <span className="text-accent">
+              {"Keep tracking activities to clear today's targets"}
+            </span>
           </div>
         </motion.div>
 
-
         {/* CARD 8: AI Twin Quick Actions / Passive Eco-Logging (Spans 2 cols, 1 row) */}
-        <motion.div 
+        <motion.div
           variants={cardVariants}
           className="md:col-span-2 glass-panel p-6 flex flex-col justify-between group hover:border-accent/20 transition-all duration-300"
         >
@@ -722,7 +899,9 @@ export default function DashboardPage() {
                     <span className="text-[11px] font-bold text-zinc-200 block group-hover:text-white transition-colors">
                       {ql.name}
                     </span>
-                    <span className="text-[8px] text-zinc-500 mt-0.5 block line-clamp-1">{ql.desc}</span>
+                    <span className="text-[8px] text-zinc-500 mt-0.5 block line-clamp-1">
+                      {ql.desc}
+                    </span>
                     <span className="inline-block mt-2 text-[9px] font-bold font-mono text-accent">
                       +{ql.xp} XP • {ql.offset}kg offset
                     </span>
@@ -732,15 +911,20 @@ export default function DashboardPage() {
             })}
           </div>
         </motion.div>
-
+        {/* CARD 8b: Weekly Budget Goals (Spans 1 col, 1 row) */}
+        <motion.div variants={cardVariants} className="md:col-span-1">
+          <GoalsWidget />
+        </motion.div>
 
         {/* CARD 9: Carbon Detective Warnings (Spans 1 col, 1 row) */}
-        <motion.div 
+        <motion.div
           variants={cardVariants}
           className="md:col-span-1 glass-panel p-5 flex flex-col justify-between group hover:border-red-500/20 hover:shadow-[0_0_30px_rgba(244,67,54,0.06)] transition-all duration-300"
         >
           <div className="flex justify-between items-start">
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Detective Report</span>
+            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+              Detective Report
+            </span>
             <AlertTriangle className="w-4 h-4 text-red-400 animate-pulse" aria-hidden="true" />
           </div>
 
@@ -760,13 +944,17 @@ export default function DashboardPage() {
                     {findings[0].totalEmissions} kg
                   </span>
                 </div>
-                <h4 className="font-syne font-bold text-xs text-zinc-200 mt-1 line-clamp-1">{findings[0].description}</h4>
+                <h4 className="font-syne font-bold text-xs text-zinc-200 mt-1 line-clamp-1">
+                  {findings[0].description}
+                </h4>
                 <p className="text-[9px] text-zinc-500 mt-0.5 leading-relaxed line-clamp-2">
                   {findings[0].recommendation}
                 </p>
               </div>
             ) : (
-              <div className="text-zinc-500 text-xs text-center py-4">No critical carbon spikes detected. You are fully optimized!</div>
+              <div className="text-zinc-500 text-xs text-center py-4">
+                No critical carbon spikes detected. You are fully optimized!
+              </div>
             )}
           </div>
 
@@ -788,7 +976,6 @@ export default function DashboardPage() {
             </button>
           )}
         </motion.div>
-
       </motion.div>
     </div>
   );
