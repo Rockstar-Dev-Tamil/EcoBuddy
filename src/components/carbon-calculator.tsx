@@ -4,15 +4,15 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CARBON_CONSTANTS } from "@/lib/carbon-utils";
 import { useGame } from "@/stores/game-store";
-import { 
-  CarFront, 
-  Utensils, 
-  Zap, 
-  ShoppingCart, 
-  Droplet, 
+import {
+  CarFront,
+  Utensils,
+  Zap,
+  ShoppingCart,
+  Droplet,
   Trash2,
   CheckCircle,
-  Plus
+  Plus,
 } from "lucide-react";
 
 // Icons for categories
@@ -27,7 +27,7 @@ const CATEGORY_ICONS: Record<string, React.ElementType<{ className?: string }>> 
 
 export function CarbonCalculator() {
   const { logAction } = useGame();
-  
+
   const [activeCategory, setActiveCategory] = useState<string>("transportation");
   const [activeItem, setActiveItem] = useState<string | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
@@ -35,7 +35,9 @@ export function CarbonCalculator() {
   const [showSuccess, setShowSuccess] = useState(false);
 
   const categories = Object.keys(CARBON_CONSTANTS);
-  const items = activeCategory ? Object.keys(CARBON_CONSTANTS[activeCategory as keyof typeof CARBON_CONSTANTS]) : [];
+  const items = activeCategory
+    ? Object.keys(CARBON_CONSTANTS[activeCategory as keyof typeof CARBON_CONSTANTS])
+    : [];
 
   const handleCategoryClick = (cat: string) => {
     setActiveCategory(cat);
@@ -52,7 +54,9 @@ export function CarbonCalculator() {
 
   const calculateEmission = () => {
     if (!activeCategory || !activeItem) return 0;
-    const baseValue = (CARBON_CONSTANTS as Record<string, Record<string, number>>)[activeCategory][activeItem];
+    const baseValue = (CARBON_CONSTANTS as Record<string, Record<string, number>>)[activeCategory][
+      activeItem
+    ];
     return baseValue * quantity;
   };
 
@@ -60,19 +64,19 @@ export function CarbonCalculator() {
 
   const handleSubmit = async () => {
     if (!activeCategory || !activeItem) return;
-    
+
     setIsSubmitting(true);
-    
+
     // Slight artificial delay for UX
-    await new Promise(resolve => setTimeout(resolve, 600));
-    
+    await new Promise((resolve) => setTimeout(resolve, 600));
+
     const emission = currentEmission;
     // Determine offset vs emission based on negative constants (like recycling)
     const isOffset = emission < 0;
-    
+
     // e.g. "Car - 12 km" or "Recycling - 5 kg"
     const desc = `${activeItem} (${quantity} units)`;
-    
+
     await logAction(
       activeCategory,
       desc,
@@ -83,7 +87,7 @@ export function CarbonCalculator() {
 
     setIsSubmitting(false);
     setShowSuccess(true);
-    
+
     setTimeout(() => {
       setShowSuccess(false);
       setActiveItem(null);
@@ -94,15 +98,17 @@ export function CarbonCalculator() {
   return (
     <div className="glass-panel p-6 flex flex-col gap-6 relative overflow-hidden">
       {/* Background glow based on emission type */}
-      <div 
+      <div
         className={`absolute -top-20 -right-20 w-64 h-64 rounded-full blur-[80px] opacity-20 pointer-events-none transition-colors duration-1000 ${
           currentEmission < 0 ? "bg-accent" : currentEmission > 5 ? "bg-red-500" : "bg-secondary"
-        }`} 
+        }`}
       />
 
       <div className="flex flex-col gap-1 z-10">
         <h2 className="font-syne font-bold text-xl text-white">Log Activity</h2>
-        <p className="text-xs text-zinc-400">Select a category and input your daily usage to track your carbon footprint.</p>
+        <p className="text-xs text-zinc-400">
+          Select a category and input your daily usage to track your carbon footprint.
+        </p>
       </div>
 
       {/* Category Selector */}
@@ -115,8 +121,8 @@ export function CarbonCalculator() {
               key={cat}
               onClick={() => handleCategoryClick(cat)}
               className={`flex flex-col items-center justify-center gap-2 p-3 rounded-xl border transition-all duration-300 ${
-                isActive 
-                  ? "bg-accent/10 border-accent/30 text-accent shadow-[0_0_15px_rgba(0,230,118,0.1)]" 
+                isActive
+                  ? "bg-accent/10 border-accent/30 text-accent shadow-[0_0_15px_rgba(0,230,118,0.1)]"
                   : "bg-white/[0.02] border-white/5 text-zinc-400 hover:bg-white/[0.05] hover:text-zinc-200"
               }`}
             >
@@ -129,7 +135,7 @@ export function CarbonCalculator() {
 
       {/* Item Selector (Chips) */}
       <AnimatePresence mode="wait">
-        <motion.div 
+        <motion.div
           key={activeCategory}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -168,10 +174,10 @@ export function CarbonCalculator() {
               </span>
             </div>
 
-            <input 
-              type="range" 
-              min="1" 
-              max="50" 
+            <input
+              type="range"
+              min="1"
+              max="50"
               value={quantity}
               onChange={(e) => setQuantity(Number(e.target.value))}
               className="w-full h-1.5 bg-zinc-800 rounded-full appearance-none cursor-pointer outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
@@ -179,11 +185,20 @@ export function CarbonCalculator() {
 
             <div className="flex justify-between items-center bg-zinc-950/50 p-4 rounded-xl border border-white/5 mt-2">
               <div className="flex flex-col">
-                <span className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Estimated Impact</span>
-                <span className={`text-xl font-outfit font-bold ${
-                  currentEmission < 0 ? "text-accent" : currentEmission > 5 ? "text-red-400" : "text-yellow-400"
-                }`}>
-                  {currentEmission > 0 ? "+" : ""}{currentEmission.toFixed(1)} kg CO₂
+                <span className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">
+                  Estimated Impact
+                </span>
+                <span
+                  className={`text-xl font-outfit font-bold ${
+                    currentEmission < 0
+                      ? "text-accent"
+                      : currentEmission > 5
+                        ? "text-red-400"
+                        : "text-yellow-400"
+                  }`}
+                >
+                  {currentEmission > 0 ? "+" : ""}
+                  {currentEmission.toFixed(1)} kg CO₂
                 </span>
               </div>
 
@@ -194,12 +209,16 @@ export function CarbonCalculator() {
                   showSuccess
                     ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
                     : isSubmitting
-                    ? "bg-zinc-800 text-zinc-500 cursor-not-allowed"
-                    : "bg-white text-black hover:bg-zinc-200 hover:scale-[1.02] active:scale-[0.98]"
+                      ? "bg-zinc-800 text-zinc-500 cursor-not-allowed"
+                      : "bg-white text-black hover:bg-zinc-200 hover:scale-[1.02] active:scale-[0.98]"
                 }`}
               >
                 {showSuccess ? (
-                  <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center gap-2">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="flex items-center gap-2"
+                  >
                     <CheckCircle className="w-4 h-4" />
                     <span>Logged!</span>
                   </motion.div>

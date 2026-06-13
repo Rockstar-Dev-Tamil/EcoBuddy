@@ -23,7 +23,6 @@ const confettiItems = Array.from({ length: 12 }).map((_, i) => {
 });
 
 export const SprigAvatar: React.FC<SprigAvatarProps> = ({ state }) => {
-
   const floatingY = {
     animate: {
       y: state === "thinking" ? [-3, 3, -3] : state === "celebrating" ? [0, -18, 0] : [-8, 8, -8],
@@ -32,7 +31,7 @@ export const SprigAvatar: React.FC<SprigAvatarProps> = ({ state }) => {
       repeat: Infinity,
       duration: state === "thinking" ? 1.4 : state === "celebrating" ? 0.55 : 3.0,
       ease: "easeInOut" as const,
-    }
+    },
   };
 
   const earRotationLeft = {
@@ -40,7 +39,7 @@ export const SprigAvatar: React.FC<SprigAvatarProps> = ({ state }) => {
     thinking: { rotate: [-12, 8, -12] },
     happy: { rotate: -15 },
     concerned: { rotate: 28 },
-    celebrating: { rotate: [0, -25, 0] }
+    celebrating: { rotate: [0, -25, 0] },
   };
 
   const earRotationRight = {
@@ -48,7 +47,7 @@ export const SprigAvatar: React.FC<SprigAvatarProps> = ({ state }) => {
     thinking: { rotate: [12, -8, 12] },
     happy: { rotate: 15 },
     concerned: { rotate: -28 },
-    celebrating: { rotate: [0, 25, 0] }
+    celebrating: { rotate: [0, 25, 0] },
   };
 
   const eyeScaleY = {
@@ -56,7 +55,7 @@ export const SprigAvatar: React.FC<SprigAvatarProps> = ({ state }) => {
     thinking: { scaleY: 0.85 },
     happy: { scaleY: 1 },
     concerned: { scaleY: 0.65 },
-    celebrating: { scaleY: 1 }
+    celebrating: { scaleY: 1 },
   };
 
   const flowerScale = {
@@ -64,7 +63,7 @@ export const SprigAvatar: React.FC<SprigAvatarProps> = ({ state }) => {
     thinking: 0.8,
     happy: 1.35,
     concerned: 0.35,
-    celebrating: 1.7
+    celebrating: 1.7,
   };
 
   return (
@@ -72,7 +71,12 @@ export const SprigAvatar: React.FC<SprigAvatarProps> = ({ state }) => {
       {/* Bioluminescent Aura Glow */}
       <motion.div
         animate={{
-          scale: state === "thinking" ? [1, 1.25, 1] : state === "celebrating" ? [1, 1.35, 1] : [1, 1.05, 1],
+          scale:
+            state === "thinking"
+              ? [1, 1.25, 1]
+              : state === "celebrating"
+                ? [1, 1.35, 1]
+                : [1, 1.05, 1],
           opacity: state === "concerned" ? 0.3 : [0.45, 0.75, 0.45],
         }}
         transition={{
@@ -81,8 +85,11 @@ export const SprigAvatar: React.FC<SprigAvatarProps> = ({ state }) => {
           ease: "easeInOut",
         }}
         className={`absolute w-44 h-44 rounded-full blur-[35px] pointer-events-none transition-colors duration-500 ${
-          state === "concerned" ? "bg-red-500/10" :
-          state === "happy" || state === "celebrating" ? "bg-emerald-400/20" : "bg-[#00E676]/15"
+          state === "concerned"
+            ? "bg-red-500/10"
+            : state === "happy" || state === "celebrating"
+              ? "bg-emerald-400/20"
+              : "bg-[#00E676]/15"
         }`}
       />
 
@@ -93,7 +100,10 @@ export const SprigAvatar: React.FC<SprigAvatarProps> = ({ state }) => {
         style={{ transformOrigin: "bottom center" }}
         className="relative w-40 h-40 flex items-center justify-center"
       >
-        <svg viewBox="0 0 200 200" className="w-full h-full drop-shadow-[0_10px_20px_rgba(0,0,0,0.6)]">
+        <svg
+          viewBox="0 0 200 200"
+          className="w-full h-full drop-shadow-[0_10px_20px_rgba(0,0,0,0.6)]"
+        >
           <defs>
             {/* Soft organic plant-wood textures */}
             <linearGradient id="sprigBody" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -119,7 +129,11 @@ export const SprigAvatar: React.FC<SprigAvatarProps> = ({ state }) => {
             strokeWidth="2"
             style={{ transformOrigin: "68px 75px" }}
             animate={earRotationLeft[state]}
-            transition={{ repeat: state === "idle" || state === "thinking" || state === "celebrating" ? Infinity : 0, duration: 1.5 }}
+            transition={{
+              repeat:
+                state === "idle" || state === "thinking" || state === "celebrating" ? Infinity : 0,
+              duration: 1.5,
+            }}
           />
 
           {/* Right Leaf Ear */}
@@ -130,12 +144,24 @@ export const SprigAvatar: React.FC<SprigAvatarProps> = ({ state }) => {
             strokeWidth="2"
             style={{ transformOrigin: "132px 75px" }}
             animate={earRotationRight[state]}
-            transition={{ repeat: state === "idle" || state === "thinking" || state === "celebrating" ? Infinity : 0, duration: 1.5 }}
+            transition={{
+              repeat:
+                state === "idle" || state === "thinking" || state === "celebrating" ? Infinity : 0,
+              duration: 1.5,
+            }}
           />
 
           {/* Plant Body */}
-          <ellipse cx="100" cy="132" rx="44" ry="48" fill="url(#sprigBody)" stroke="#114524" strokeWidth="2.5" />
-          
+          <ellipse
+            cx="100"
+            cy="132"
+            rx="44"
+            ry="48"
+            fill="url(#sprigBody)"
+            stroke="#114524"
+            strokeWidth="2.5"
+          />
+
           {/* Head */}
           <motion.g
             animate={{
@@ -145,7 +171,14 @@ export const SprigAvatar: React.FC<SprigAvatarProps> = ({ state }) => {
             style={{ transformOrigin: "100px 105px" }}
           >
             {/* Head sphere */}
-            <circle cx="100" cy="80" r="39" fill="url(#sprigBody)" stroke="#114524" strokeWidth="2.5" />
+            <circle
+              cx="100"
+              cy="80"
+              r="39"
+              fill="url(#sprigBody)"
+              stroke="#114524"
+              strokeWidth="2.5"
+            />
 
             {/* Glowing Eyes */}
             <motion.ellipse
@@ -156,7 +189,11 @@ export const SprigAvatar: React.FC<SprigAvatarProps> = ({ state }) => {
               fill={state === "concerned" ? "#a7f3d0" : "#ffffff"}
               style={{ transformOrigin: "86px 76px" }}
               animate={eyeScaleY[state]}
-              transition={{ repeat: state === "idle" ? Infinity : 0, duration: 3.5, repeatDelay: 1.2 }}
+              transition={{
+                repeat: state === "idle" ? Infinity : 0,
+                duration: 3.5,
+                repeatDelay: 1.2,
+              }}
             />
             <motion.ellipse
               cx="114"
@@ -166,7 +203,11 @@ export const SprigAvatar: React.FC<SprigAvatarProps> = ({ state }) => {
               fill={state === "concerned" ? "#a7f3d0" : "#ffffff"}
               style={{ transformOrigin: "114px 76px" }}
               animate={eyeScaleY[state]}
-              transition={{ repeat: state === "idle" ? Infinity : 0, duration: 3.5, repeatDelay: 1.2 }}
+              transition={{
+                repeat: state === "idle" ? Infinity : 0,
+                duration: 3.5,
+                repeatDelay: 1.2,
+              }}
             />
 
             {/* Cheeks */}
@@ -175,11 +216,29 @@ export const SprigAvatar: React.FC<SprigAvatarProps> = ({ state }) => {
 
             {/* Mouth Curvature */}
             {state === "happy" || state === "celebrating" ? (
-              <path d="M 93,84 Q 100,94 107,84" fill="none" stroke="#114524" strokeWidth="2.5" strokeLinecap="round" />
+              <path
+                d="M 93,84 Q 100,94 107,84"
+                fill="none"
+                stroke="#114524"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
             ) : state === "concerned" ? (
-              <path d="M 94,88 Q 100,83 106,88" fill="none" stroke="#114524" strokeWidth="2.5" strokeLinecap="round" />
+              <path
+                d="M 94,88 Q 100,83 106,88"
+                fill="none"
+                stroke="#114524"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
             ) : (
-              <path d="M 95,85 L 105,85" fill="none" stroke="#114524" strokeWidth="2.5" strokeLinecap="round" />
+              <path
+                d="M 95,85 L 105,85"
+                fill="none"
+                stroke="#114524"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
             )}
 
             {/* Top stem */}
@@ -200,8 +259,20 @@ export const SprigAvatar: React.FC<SprigAvatarProps> = ({ state }) => {
           </motion.g>
 
           {/* Sprout branches hands */}
-          <path d="M 56,128 C 48,133 43,128 40,123" fill="none" stroke="#114524" strokeWidth="2.5" strokeLinecap="round" />
-          <path d="M 144,128 C 152,133 157,128 160,123" fill="none" stroke="#114524" strokeWidth="2.5" strokeLinecap="round" />
+          <path
+            d="M 56,128 C 48,133 43,128 40,123"
+            fill="none"
+            stroke="#114524"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+          />
+          <path
+            d="M 144,128 C 152,133 157,128 160,123"
+            fill="none"
+            stroke="#114524"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+          />
         </svg>
 
         {/* Orbiting sparkles during thinking */}

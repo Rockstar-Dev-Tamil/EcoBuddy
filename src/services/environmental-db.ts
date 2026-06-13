@@ -90,7 +90,7 @@ export const EnvironmentalDB = {
 
       // Check ecoscore carbon footprint in product details
       const ecoscoreGrade = product.ecoscore_grade || "c";
-      
+
       // Determine CO2 footprint (try agribalyse values first, then carbon 100g, then estimate from grade)
       let co2PerKg = 1.5; // Default C grade
       let score = 50;
@@ -99,7 +99,8 @@ export const EnvironmentalDB = {
         co2PerKg = parseFloat(product.ecoscore_data.agribalyse.co2_total);
         score = product.ecoscore_data.score || 50;
       } else if (product.nutriments?.["carbon-footprint-from-known-ingredients_100g"]) {
-        co2PerKg = parseFloat(product.nutriments["carbon-footprint-from-known-ingredients_100g"]) * 10;
+        co2PerKg =
+          parseFloat(product.nutriments["carbon-footprint-from-known-ingredients_100g"]) * 10;
         score = mapGradeToScore(ecoscoreGrade);
       } else {
         co2PerKg = mapGradeToCO2(ecoscoreGrade);
@@ -124,11 +125,9 @@ export const EnvironmentalDB = {
    */
   lookupAgribalyse(ingredient: string): EnvironmentalItem {
     const key = ingredient.toLowerCase().trim();
-    
+
     // Find matching key in static database
-    const matchedKey = Object.keys(AGRIBALYSE_DB).find(
-      (k) => key.includes(k) || k.includes(key)
-    );
+    const matchedKey = Object.keys(AGRIBALYSE_DB).find((k) => key.includes(k) || k.includes(key));
 
     if (matchedKey) {
       const match = AGRIBALYSE_DB[matchedKey];
@@ -155,7 +154,10 @@ export const EnvironmentalDB = {
    * Calculate Electricity emissions based on EPA eGRID average factors
    * Coefficient: 0.371 kg CO2e / kWh
    */
-  calculateUtilityEmissions(quantityValue: number, utilityType: "electricity" | "gas" | "water"): EnvironmentalItem {
+  calculateUtilityEmissions(
+    quantityValue: number,
+    utilityType: "electricity" | "gas" | "water"
+  ): EnvironmentalItem {
     let co2 = 0;
     let score = 50;
     let source = "EPA eGRID regional coefficients";
@@ -163,14 +165,14 @@ export const EnvironmentalDB = {
     if (utilityType === "electricity") {
       co2 = quantityValue * 0.371; // 0.371 kg CO2 per kWh
       // Score: 100 kWh is normal. Lower is greener.
-      score = Math.max(10, Math.min(100, Math.round(100 - (quantityValue / 5))));
+      score = Math.max(10, Math.min(100, Math.round(100 - quantityValue / 5)));
     } else if (utilityType === "gas") {
       co2 = quantityValue * 1.89; // 1.89 kg CO2 per cubic meter
-      score = Math.max(10, Math.min(100, Math.round(100 - (quantityValue * 1.5))));
+      score = Math.max(10, Math.min(100, Math.round(100 - quantityValue * 1.5)));
       source = "EPA greenhouse gas equivalencies";
     } else if (utilityType === "water") {
       co2 = quantityValue * 0.298; // 0.298 kg CO2 per cubic meter (processing energy)
-      score = Math.max(10, Math.min(100, Math.round(100 - (quantityValue / 2))));
+      score = Math.max(10, Math.min(100, Math.round(100 - quantityValue / 2)));
       source = "WaterUK carbon intensity benchmarks";
     }
 
@@ -209,28 +211,40 @@ export const EnvironmentalDB = {
       source: "Ecoinvent Packaging LCA Database",
       sustainabilityScore: score,
     };
-  }
+  },
 };
 
 // Mappings for Ecoscore grades
 function mapGradeToCO2(grade: string): number {
   switch (grade.toLowerCase()) {
-    case "a": return 0.38;
-    case "b": return 0.76;
-    case "c": return 1.48;
-    case "d": return 2.95;
-    case "e": return 7.20;
-    default: return 1.50;
+    case "a":
+      return 0.38;
+    case "b":
+      return 0.76;
+    case "c":
+      return 1.48;
+    case "d":
+      return 2.95;
+    case "e":
+      return 7.2;
+    default:
+      return 1.5;
   }
 }
 
 function mapGradeToScore(grade: string): number {
   switch (grade.toLowerCase()) {
-    case "a": return 92;
-    case "b": return 78;
-    case "c": return 58;
-    case "d": return 35;
-    case "e": return 12;
-    default: return 50;
+    case "a":
+      return 92;
+    case "b":
+      return 78;
+    case "c":
+      return 58;
+    case "d":
+      return 35;
+    case "e":
+      return 12;
+    default:
+      return 50;
   }
 }

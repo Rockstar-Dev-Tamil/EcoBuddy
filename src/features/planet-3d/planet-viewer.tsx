@@ -27,11 +27,12 @@ const noise3D = (x: number, y: number, z: number): number => {
   let frequency = 1.0;
 
   for (let i = 0; i < 4; i++) {
-    value += (
-      Math.sin(x * frequency) * Math.cos(y * frequency + 1.0) +
-      Math.sin(y * frequency * 1.5 + 2.0) * Math.cos(z * frequency) +
-      Math.sin(z * frequency * 2.0 + 3.0) * Math.cos(x * frequency)
-    ) * amplitude * 0.33;
+    value +=
+      (Math.sin(x * frequency) * Math.cos(y * frequency + 1.0) +
+        Math.sin(y * frequency * 1.5 + 2.0) * Math.cos(z * frequency) +
+        Math.sin(z * frequency * 2.0 + 3.0) * Math.cos(x * frequency)) *
+      amplitude *
+      0.33;
 
     amplitude *= 0.5;
     frequency *= 2.2;
@@ -107,12 +108,7 @@ const LandCore: React.FC<{
 
   return (
     <mesh ref={meshRef} geometry={landGeometry} castShadow receiveShadow>
-      <meshStandardMaterial
-        vertexColors
-        roughness={0.9}
-        metalness={0.05}
-        flatShading
-      />
+      <meshStandardMaterial vertexColors roughness={0.9} metalness={0.05} flatShading />
     </mesh>
   );
 };
@@ -167,7 +163,7 @@ const EnvironmentElements: React.FC<{
     const list = [];
     const maxItems = Math.floor(vegetation * 60) + Math.floor(wildlife * 30);
     let seed = 12345;
-    
+
     const random = () => {
       const x = Math.sin(seed++) * 10000;
       return x - Math.floor(x);
@@ -220,7 +216,7 @@ const EnvironmentElements: React.FC<{
           quaternion: [quat.x, quat.y, quat.z, quat.w] as [number, number, number, number],
           type,
           scale: 0.5 + random() * 0.6,
-          colorSeed: random()
+          colorSeed: random(),
         });
       }
     }
@@ -242,8 +238,13 @@ const EnvironmentElements: React.FC<{
   return (
     <group ref={groupRef}>
       {elements.map((el) => {
-        const quat = new THREE.Quaternion(el.quaternion[0], el.quaternion[1], el.quaternion[2], el.quaternion[3]);
-        
+        const quat = new THREE.Quaternion(
+          el.quaternion[0],
+          el.quaternion[1],
+          el.quaternion[2],
+          el.quaternion[3]
+        );
+
         switch (el.type) {
           case "pine":
             return (
@@ -264,7 +265,7 @@ const EnvironmentElements: React.FC<{
                 </mesh>
               </group>
             );
-          
+
           case "oak":
             return (
               <group key={el.key} position={el.position} quaternion={quat} scale={el.scale}>
@@ -288,7 +289,7 @@ const EnvironmentElements: React.FC<{
                 </mesh>
               </group>
             );
-          
+
           case "grass":
             return (
               <group key={el.key} position={el.position} quaternion={quat} scale={el.scale}>
@@ -309,7 +310,10 @@ const EnvironmentElements: React.FC<{
 
           case "flower": {
             const flowerColors = ["#ff5722", "#e91e63", "#ffeb3b", "#9c27b0", "#00bcd4"];
-            const fColor = pollution > 0.6 ? "#776e5a" : flowerColors[Math.floor(el.colorSeed * flowerColors.length)];
+            const fColor =
+              pollution > 0.6
+                ? "#776e5a"
+                : flowerColors[Math.floor(el.colorSeed * flowerColors.length)];
             return (
               <group key={el.key} position={el.position} quaternion={quat} scale={el.scale}>
                 {/* Stem */}
@@ -327,18 +331,20 @@ const EnvironmentElements: React.FC<{
           }
 
           case "rabbit":
-            return (
-              <Rabbit key={el.key} pos={el.position} quat={quat} scale={el.scale} />
-            );
+            return <Rabbit key={el.key} pos={el.position} quat={quat} scale={el.scale} />;
 
           case "deer":
-            return (
-              <Deer key={el.key} pos={el.position} quat={quat} scale={el.scale} />
-            );
+            return <Deer key={el.key} pos={el.position} quat={quat} scale={el.scale} />;
 
           case "butterfly":
             return (
-              <Butterfly key={el.key} pos={el.position} quat={quat} scale={el.scale} colorSeed={el.colorSeed} />
+              <Butterfly
+                key={el.key}
+                pos={el.position}
+                quat={quat}
+                scale={el.scale}
+                colorSeed={el.colorSeed}
+              />
             );
 
           default:
@@ -350,7 +356,11 @@ const EnvironmentElements: React.FC<{
 };
 
 // Hop animation component for rabbits
-const Rabbit: React.FC<{ pos: [number, number, number]; quat: THREE.Quaternion; scale: number }> = ({ pos, quat, scale }) => {
+const Rabbit: React.FC<{
+  pos: [number, number, number];
+  quat: THREE.Quaternion;
+  scale: number;
+}> = ({ pos, quat, scale }) => {
   const groupRef = useRef<THREE.Group>(null);
 
   useFrame((state) => {
@@ -388,7 +398,11 @@ const Rabbit: React.FC<{ pos: [number, number, number]; quat: THREE.Quaternion; 
 };
 
 // Node animation component for deers
-const Deer: React.FC<{ pos: [number, number, number]; quat: THREE.Quaternion; scale: number }> = ({ pos, quat, scale }) => {
+const Deer: React.FC<{ pos: [number, number, number]; quat: THREE.Quaternion; scale: number }> = ({
+  pos,
+  quat,
+  scale,
+}) => {
   const headRef = useRef<THREE.Group>(null);
 
   useFrame((state) => {
@@ -492,7 +506,7 @@ const OrbitingBirds: React.FC<{ count: number }> = ({ count }) => {
         orbitRadius: 2.55 + i * 0.12,
         wingFlapSpeed: 14 + i * 2,
         phase: i * Math.PI * 0.67,
-        pitchPhase: i * 3.5
+        pitchPhase: i * 3.5,
       });
     }
     return list;
@@ -577,11 +591,7 @@ const DynamicSunlight: React.FC<{ isNightMode: boolean }> = ({ isNightMode }) =>
     if (lightRef.current) {
       const angle = time * speed;
       const radius = 6.0;
-      lightRef.current.position.set(
-        Math.cos(angle) * radius,
-        3.5,
-        Math.sin(angle) * radius
-      );
+      lightRef.current.position.set(Math.cos(angle) * radius, 3.5, Math.sin(angle) * radius);
     }
   });
 
@@ -607,7 +617,10 @@ const DynamicSunlight: React.FC<{ isNightMode: boolean }> = ({ isNightMode }) =>
 };
 
 // 7. Low-Poly Clouds Component
-const CloudsLayer: React.FC<{ speedMultiplier: number; pollution: number }> = ({ speedMultiplier, pollution }) => {
+const CloudsLayer: React.FC<{ speedMultiplier: number; pollution: number }> = ({
+  speedMultiplier,
+  pollution,
+}) => {
   const groupRef = useRef<THREE.Group>(null);
 
   useFrame((state, delta) => {
@@ -635,9 +648,9 @@ const CloudsLayer: React.FC<{ speedMultiplier: number; pollution: number }> = ({
         position: [
           r * Math.sin(phi) * Math.cos(theta),
           r * Math.cos(phi),
-          r * Math.sin(phi) * Math.sin(theta)
+          r * Math.sin(phi) * Math.sin(theta),
         ] as [number, number, number],
-        scale: 0.2 + Math.sin(i * 2) * 0.06
+        scale: 0.2 + Math.sin(i * 2) * 0.06,
       });
     }
     return list;
@@ -650,15 +663,33 @@ const CloudsLayer: React.FC<{ speedMultiplier: number; pollution: number }> = ({
           {/* Overlapping spherical clusters */}
           <mesh castShadow>
             <sphereGeometry args={[c.scale, 7, 7]} />
-            <meshStandardMaterial color={cloudColor} roughness={0.9} transparent opacity={0.75} flatShading />
+            <meshStandardMaterial
+              color={cloudColor}
+              roughness={0.9}
+              transparent
+              opacity={0.75}
+              flatShading
+            />
           </mesh>
           <mesh position={[c.scale * 0.5, 0, 0]} castShadow>
             <sphereGeometry args={[c.scale * 0.75, 6, 6]} />
-            <meshStandardMaterial color={cloudColor} roughness={0.9} transparent opacity={0.75} flatShading />
+            <meshStandardMaterial
+              color={cloudColor}
+              roughness={0.9}
+              transparent
+              opacity={0.75}
+              flatShading
+            />
           </mesh>
           <mesh position={[-0.4 * c.scale, 0.25 * c.scale, 0]} castShadow>
             <sphereGeometry args={[c.scale * 0.65, 6, 6]} />
-            <meshStandardMaterial color={cloudColor} roughness={0.9} transparent opacity={0.75} flatShading />
+            <meshStandardMaterial
+              color={cloudColor}
+              roughness={0.9}
+              transparent
+              opacity={0.75}
+              flatShading
+            />
           </mesh>
         </group>
       ))}
@@ -742,10 +773,7 @@ const FireflyParticles: React.FC<{ pollution: number; count: number }> = ({ poll
   return (
     <points ref={pointsRef}>
       <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[positions, 3]}
-        />
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
       <pointsMaterial
         color="#39ff14" // neon green fireflies
@@ -766,59 +794,61 @@ export const PlanetViewer: React.FC<PlanetViewerProps> = ({
   pollution,
   cloudSpeedMultiplier = 1.0,
   isNightMode = false,
-  autoRotate = false
+  autoRotate = false,
 }) => {
   return (
     <div className="w-full h-full relative" style={{ minHeight: "400px" }}>
       <ErrorBoundary>
         <Suspense fallback={<LeafLoader />}>
-          <Canvas
-            shadows
-            camera={{ position: [0, 0, 4.6], fov: 60 }}
-            gl={{ antialias: true }}
-          >
-        {/* Dynamic Sun/Moon and Shadows */}
-        <DynamicSunlight isNightMode={isNightMode} />
+          <Canvas shadows camera={{ position: [0, 0, 4.6], fov: 60 }} gl={{ antialias: true }}>
+            {/* Dynamic Sun/Moon and Shadows */}
+            <DynamicSunlight isNightMode={isNightMode} />
 
-        {/* Miniature displaced land core */}
-        <LandCore
-          pollution={pollution}
-        />
+            {/* Miniature displaced land core */}
+            <LandCore pollution={pollution} />
 
-        {/* Transparent liquid ocean boundaries */}
-        <WaterSphere pollution={pollution} />
+            {/* Transparent liquid ocean boundaries */}
+            <WaterSphere pollution={pollution} />
 
-        {/* Forest clusters, flowers, and animals spawning on land */}
-        <EnvironmentElements
-          vegetation={vegetation}
-          wildlife={wildlife}
-          pollution={pollution}
-        />
+            {/* Forest clusters, flowers, and animals spawning on land */}
+            <EnvironmentElements
+              vegetation={vegetation}
+              wildlife={wildlife}
+              pollution={pollution}
+            />
 
-        {/* Low poly cloud systems */}
-        <CloudsLayer speedMultiplier={cloudSpeedMultiplier} pollution={pollution} />
+            {/* Low poly cloud systems */}
+            <CloudsLayer speedMultiplier={cloudSpeedMultiplier} pollution={pollution} />
 
-        {/* Smooth ambient atmosphere halo */}
-        <AtmosphericShell pollution={pollution} />
+            {/* Smooth ambient atmosphere halo */}
+            <AtmosphericShell pollution={pollution} />
 
-        {/* Orbiting flying birds */}
-        {wildlife > 0.1 && <OrbitingBirds count={Math.min(4, Math.floor(wildlife * 5) + 1)} />}
+            {/* Orbiting flying birds */}
+            {wildlife > 0.1 && <OrbitingBirds count={Math.min(4, Math.floor(wildlife * 5) + 1)} />}
 
-        {/* Drifting fireflies under clean skies */}
-        <FireflyParticles pollution={pollution} count={35} />
+            {/* Drifting fireflies under clean skies */}
+            <FireflyParticles pollution={pollution} count={35} />
 
-        {/* Outer Stars background */}
-        <Stars radius={90} depth={40} count={isNightMode ? 2500 : 1000} factor={3} saturation={0.8} fade speed={1.2} />
+            {/* Outer Stars background */}
+            <Stars
+              radius={90}
+              depth={40}
+              count={isNightMode ? 2500 : 1000}
+              factor={3}
+              saturation={0.8}
+              fade
+              speed={1.2}
+            />
 
-        {/* Inertial Orbit Controls */}
-        <OrbitControls
-          enableZoom={true}
-          enablePan={false}
-          minDistance={3.2}
-          maxDistance={7.5}
-          autoRotate={autoRotate}
-          autoRotateSpeed={1.2}
-        />
+            {/* Inertial Orbit Controls */}
+            <OrbitControls
+              enableZoom={true}
+              enablePan={false}
+              minDistance={3.2}
+              maxDistance={7.5}
+              autoRotate={autoRotate}
+              autoRotateSpeed={1.2}
+            />
           </Canvas>
         </Suspense>
       </ErrorBoundary>

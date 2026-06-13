@@ -1,6 +1,6 @@
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { Profile, PlanetState, SustainabilityLog, LeaderboardEntry, ChatMessage } from "@/types";
-import { ProfileSchema, PlanetStateSchema, } from "@/types/schemas";
+import { ProfileSchema, PlanetStateSchema } from "@/types/schemas";
 
 export const SupabaseService = {
   /**
@@ -20,7 +20,7 @@ export const SupabaseService = {
     defaultAvatar?: string
   ): Promise<Profile | null> {
     if (!this.isEnabled()) return null;
-    
+
     try {
       const { data, error } = await supabase!
         .from("profiles")
@@ -30,7 +30,8 @@ export const SupabaseService = {
 
       if (error && error.code === "PGRST116") {
         // Profile not found - Auto seed it (especially for Google OAuth)
-        const username = defaultName || (email ? email.split("@")[0] : "EcoAdventurer_" + userId.slice(0, 5));
+        const username =
+          defaultName || (email ? email.split("@")[0] : "EcoAdventurer_" + userId.slice(0, 5));
         const avatar_url = defaultAvatar || "/avatars/avatar_default.png";
         const newProfile: Omit<Profile, "created_at"> = {
           id: userId,
@@ -49,10 +50,10 @@ export const SupabaseService = {
           .single();
 
         if (insertError) throw insertError;
-        
+
         // Auto-seed planet state as well
         await this.seedPlanetState(userId);
-        
+
         return inserted as Profile;
       }
 
@@ -135,7 +136,10 @@ export const SupabaseService = {
       if (error) throw error;
       return PlanetStateSchema.parse(data) as PlanetState;
     } catch (e) {
-      console.error("Error in Supabase getPlanetState:", e instanceof Error ? e.message : String(e));
+      console.error(
+        "Error in Supabase getPlanetState:",
+        e instanceof Error ? e.message : String(e)
+      );
       return null;
     }
   },
@@ -143,7 +147,10 @@ export const SupabaseService = {
   /**
    * Update planet visual factors
    */
-  async updatePlanetState(userId: string, updates: Partial<PlanetState>): Promise<PlanetState | null> {
+  async updatePlanetState(
+    userId: string,
+    updates: Partial<PlanetState>
+  ): Promise<PlanetState | null> {
     if (!this.isEnabled()) return null;
     try {
       const { data, error } = await supabase!
@@ -156,7 +163,10 @@ export const SupabaseService = {
       if (error) throw error;
       return data as PlanetState;
     } catch (e) {
-      console.error("Error in Supabase updatePlanetState:", e instanceof Error ? e.message : String(e));
+      console.error(
+        "Error in Supabase updatePlanetState:",
+        e instanceof Error ? e.message : String(e)
+      );
       return null;
     }
   },
@@ -184,7 +194,10 @@ export const SupabaseService = {
   /**
    * Add a new action log
    */
-  async addLog(userId: string, log: Omit<SustainabilityLog, "id" | "profile_id" | "created_at">): Promise<SustainabilityLog | null> {
+  async addLog(
+    userId: string,
+    log: Omit<SustainabilityLog, "id" | "profile_id" | "created_at">
+  ): Promise<SustainabilityLog | null> {
     if (!this.isEnabled()) return null;
     try {
       const { data, error } = await supabase!
@@ -224,7 +237,11 @@ export const SupabaseService = {
   /**
    * Add chat log entry
    */
-  async addChat(userId: string, sender: "user" | "ai", message: string): Promise<ChatMessage | null> {
+  async addChat(
+    userId: string,
+    sender: "user" | "ai",
+    message: string
+  ): Promise<ChatMessage | null> {
     if (!this.isEnabled()) return null;
     try {
       const { data, error } = await supabase!
@@ -247,10 +264,7 @@ export const SupabaseService = {
   async clearChat(userId: string): Promise<boolean> {
     if (!this.isEnabled()) return false;
     try {
-      const { error } = await supabase!
-        .from("chat_history")
-        .delete()
-        .eq("profile_id", userId);
+      const { error } = await supabase!.from("chat_history").delete().eq("profile_id", userId);
 
       return !error;
     } catch (e) {
@@ -272,18 +286,21 @@ export const SupabaseService = {
         .limit(20);
 
       if (error) throw error;
-      
+
       return data.map((item: Record<string, unknown>, idx: number) => ({
         profile_id: String(item.id),
         username: String(item.username),
         xp: Number(item.xp),
         green_score: Number(item.green_score),
         rank: idx + 1,
-        rank_movement: 0
+        rank_movement: 0,
       }));
     } catch (e) {
-      console.error("Error in Supabase getLeaderboard:", e instanceof Error ? e.message : String(e));
+      console.error(
+        "Error in Supabase getLeaderboard:",
+        e instanceof Error ? e.message : String(e)
+      );
       return [];
     }
-  }
+  },
 };

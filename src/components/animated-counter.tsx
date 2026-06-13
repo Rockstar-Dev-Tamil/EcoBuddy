@@ -36,5 +36,9 @@ export function AnimatedCounter({
     return () => controls.stop();
   }, [value, format]);
 
-  return <span ref={ref} className={className}>{format(value)}</span>;
+  return (
+    <span ref={ref} className={className}>
+      {format(value)}
+    </span>
+  );
 }

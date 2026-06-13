@@ -15,7 +15,7 @@ interface State {
 
 export class ErrorBoundary extends Component<Props, State> {
   public state: State = {
-    hasError: false
+    hasError: false,
   };
 
   public static getDerivedStateFromError(error: Error): State {
@@ -39,7 +39,8 @@ export class ErrorBoundary extends Component<Props, State> {
           </div>
           <h2 className="text-zinc-100 font-syne font-bold text-lg mb-2">Something went wrong</h2>
           <p className="text-zinc-400 text-xs max-w-sm mb-6">
-            We encountered an unexpected error while loading this component. Our neural plant pathways are working on a fix.
+            We encountered an unexpected error while loading this component. Our neural plant
+            pathways are working on a fix.
           </p>
           <button
             onClick={() => this.setState({ hasError: false, error: undefined })}

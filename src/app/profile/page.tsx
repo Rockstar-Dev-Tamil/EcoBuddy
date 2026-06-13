@@ -11,7 +11,7 @@ import { User, Camera, LogOut, Flame, Check } from "lucide-react";
 export default function ProfilePage() {
   const router = useRouter();
   const { profile, achievements, refreshAll, userId } = useGame();
-  
+
   const [mounted, setMounted] = useState(false);
   const [username, setUsername] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
@@ -66,7 +66,7 @@ export default function ProfilePage() {
           avatar_url: avatarUrl,
         });
       }
-      
+
       refreshAll();
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
@@ -122,7 +122,9 @@ export default function ProfilePage() {
             </div>
             <div>
               <h1 className="font-syne font-bold text-xl text-white">Profile Dashboard</h1>
-              <p className="text-xs text-zinc-400">Edit your credentials, choose an avatar, and check achievements.</p>
+              <p className="text-xs text-zinc-400">
+                Edit your credentials, choose an avatar, and check achievements.
+              </p>
             </div>
           </div>
 
@@ -139,9 +141,12 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
           {/* Left: Edit credentials Form (7 cols) */}
           <div className="md:col-span-7">
-            <form onSubmit={handleSaveProfile} className="glass-panel p-6 rounded-2xl border border-white/5 flex flex-col gap-5">
+            <form
+              onSubmit={handleSaveProfile}
+              className="glass-panel p-6 rounded-2xl border border-white/5 flex flex-col gap-5"
+            >
               <h2 className="font-syne font-bold text-base text-zinc-200">Personal Details</h2>
-              
+
               <hr className="border-zinc-800/80" />
 
               {/* Avatar Uploader Preview */}
@@ -151,10 +156,16 @@ export default function ProfilePage() {
                     {avatarUrl ? (
                       <>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={avatarUrl} alt="User Avatar" className="w-full h-full object-cover" />
+                        <img
+                          src={avatarUrl}
+                          alt="User Avatar"
+                          className="w-full h-full object-cover"
+                        />
                       </>
+                    ) : username ? (
+                      username[0].toUpperCase()
                     ) : (
-                      username ? username[0].toUpperCase() : "U"
+                      "U"
                     )}
                   </div>
                   {/* Uploader Input trigger overlay */}
@@ -170,14 +181,23 @@ export default function ProfilePage() {
                   </label>
                 </div>
                 <div>
-                  <span className="text-xs font-bold text-zinc-300 block">Upload Profile Photo</span>
-                  <span className="text-[10px] text-zinc-500 mt-1 block">Click the avatar circle to select a file. Max 1MB.</span>
+                  <span className="text-xs font-bold text-zinc-300 block">
+                    Upload Profile Photo
+                  </span>
+                  <span className="text-[10px] text-zinc-500 mt-1 block">
+                    Click the avatar circle to select a file. Max 1MB.
+                  </span>
                 </div>
               </div>
 
               {/* Username Input */}
               <div className="flex flex-col gap-1.5 mt-2">
-                <label htmlFor="profile-username-input" className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Username</label>
+                <label
+                  htmlFor="profile-username-input"
+                  className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider"
+                >
+                  Username
+                </label>
                 <input
                   id="profile-username-input"
                   type="text"
@@ -195,7 +215,11 @@ export default function ProfilePage() {
                 id="btn-save-profile"
                 className="w-full py-3 bg-accent hover:bg-accent-bright text-black font-syne font-bold rounded-full text-xs transition-all duration-300 mt-4 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
-                {isSaving ? "Saving profile..." : saveSuccess ? "Saved successfully!" : "Save Changes"}
+                {isSaving
+                  ? "Saving profile..."
+                  : saveSuccess
+                    ? "Saved successfully!"
+                    : "Save Changes"}
               </button>
 
               {saveSuccess && (
@@ -215,17 +239,18 @@ export default function ProfilePage() {
 
           {/* Right: User Statistics Summary & Badges (5 cols) */}
           <div className="md:col-span-5 flex flex-col gap-6">
-            
             {/* Gamification metrics list */}
             <div className="glass-panel p-6 rounded-2xl border border-white/5 flex flex-col gap-4">
               <h2 className="font-syne font-bold text-base text-zinc-200">Ecology Stats</h2>
-              
+
               <hr className="border-zinc-800/80" />
 
               <div className="flex flex-col gap-3">
                 <div className="flex justify-between items-center text-xs">
                   <span className="text-zinc-500 font-medium">Level Status</span>
-                  <span className="text-emerald-400 font-bold">Lvl {profile.level} ({getLevelName(profile.level)})</span>
+                  <span className="text-emerald-400 font-bold">
+                    Lvl {profile.level} ({getLevelName(profile.level)})
+                  </span>
                 </div>
 
                 <div className="flex justify-between items-center text-xs">
@@ -248,7 +273,9 @@ export default function ProfilePage() {
 
                 <div className="flex justify-between items-center text-xs">
                   <span className="text-zinc-500 font-medium">Badges Unlocked</span>
-                  <span className="text-purple-400 font-bold">{unlockedCount} / {achievements.length}</span>
+                  <span className="text-purple-400 font-bold">
+                    {unlockedCount} / {achievements.length}
+                  </span>
                 </div>
               </div>
             </div>
@@ -256,26 +283,29 @@ export default function ProfilePage() {
             {/* Locked/Unlocked Badges Shelf list */}
             <div className="glass-panel p-6 rounded-2xl border border-white/5 flex flex-col gap-4">
               <h2 className="font-syne font-bold text-sm text-zinc-200">Unlocked Badges Shelf</h2>
-              
+
               <hr className="border-zinc-800/80" />
 
               {unlockedCount === 0 ? (
-                <span className="text-xs text-zinc-500 text-center py-4">No badges unlocked yet. Complete daily logs to start earning!</span>
+                <span className="text-xs text-zinc-500 text-center py-4">
+                  No badges unlocked yet. Complete daily logs to start earning!
+                </span>
               ) : (
                 <div className="grid grid-cols-4 gap-3">
-                  {achievements.filter((a) => a.unlocked).map((ach) => (
-                    <div 
-                      key={ach.id} 
-                      className="w-11 h-11 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center text-xl select-none"
-                      title={`${ach.name}: ${ach.description}`}
-                    >
-                      {ach.badge_url}
-                    </div>
-                  ))}
+                  {achievements
+                    .filter((a) => a.unlocked)
+                    .map((ach) => (
+                      <div
+                        key={ach.id}
+                        className="w-11 h-11 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center text-xl select-none"
+                        title={`${ach.name}: ${ach.description}`}
+                      >
+                        {ach.badge_url}
+                      </div>
+                    ))}
                 </div>
               )}
             </div>
-
           </div>
         </div>
       </section>

@@ -5,19 +5,19 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useGame } from "@/stores/game-store";
-import { 
-  LayoutDashboard, 
-  Globe, 
-  Bot, 
-  Camera, 
-  Compass, 
-  Users, 
-  Flame, 
-  Leaf, 
-  ChevronLeft, 
-  ChevronRight, 
+import {
+  LayoutDashboard,
+  Globe,
+  Bot,
+  Camera,
+  Compass,
+  Users,
+  Flame,
+  Leaf,
+  ChevronLeft,
+  ChevronRight,
   Activity,
-  LogOut 
+  LogOut,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SupabaseService } from "@/services/supabase-service";
@@ -109,7 +109,7 @@ export const Navbar: React.FC<NavbarProps> = ({ children }) => {
   return (
     <div className="flex min-h-screen bg-[#0A0F0A] text-white">
       {/* 1. DESKTOP SIDEBAR NAVIGATION (lg:flex) */}
-      <aside 
+      <aside
         className={`hidden lg:flex flex-col justify-between fixed top-0 bottom-0 left-0 z-30 bg-[#0A0F0A] border-r border-white/5 transition-all duration-300 ${
           isCollapsed ? "w-[72px]" : "w-60"
         }`}
@@ -141,14 +141,16 @@ export const Navbar: React.FC<NavbarProps> = ({ children }) => {
                   id={`sidebar-link-${item.name.toLowerCase().replace(" ", "-")}`}
                   aria-current={isActive ? "page" : undefined}
                   className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all duration-300 group ${
-                    isActive 
-                      ? "bg-accent/10 text-accent border border-accent/20" 
+                    isActive
+                      ? "bg-accent/10 text-accent border border-accent/20"
                       : "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent"
                   }`}
                 >
-                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-accent" : "opacity-80 group-hover:opacity-100"}`} />
+                  <Icon
+                    className={`w-4 h-4 shrink-0 ${isActive ? "text-accent" : "opacity-80 group-hover:opacity-100"}`}
+                  />
                   {!isCollapsed && <span>{item.name}</span>}
-                  
+
                   {/* Tooltip on collapsed */}
                   {isCollapsed && (
                     <div className="absolute left-16 bg-[#111811] text-accent border border-accent/20 px-2 py-1 rounded-md text-[10px] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-md z-50 font-syne">
@@ -180,13 +182,17 @@ export const Navbar: React.FC<NavbarProps> = ({ children }) => {
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             className="w-full py-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-zinc-400 hover:text-white flex items-center justify-center cursor-pointer transition-all duration-300"
           >
-            {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            {isCollapsed ? (
+              <ChevronRight className="w-4 h-4" />
+            ) : (
+              <ChevronLeft className="w-4 h-4" />
+            )}
           </button>
         </div>
       </aside>
 
       {/* 2. RIGHT CONTENT PAGE container */}
-      <div 
+      <div
         className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${
           isCollapsed ? "lg:pl-[72px]" : "lg:pl-60"
         }`}
@@ -194,9 +200,7 @@ export const Navbar: React.FC<NavbarProps> = ({ children }) => {
         {/* Top Floating Header Navbar */}
         <header className="sticky top-0 z-20 w-full bg-[#0A0F0A]/80 backdrop-blur-md border-b border-white/5 h-16 px-4 md:px-8 flex items-center justify-between">
           {/* Breadcrumbs */}
-          <div className="flex items-center gap-2">
-            {getBreadcrumbs()}
-          </div>
+          <div className="flex items-center gap-2">{getBreadcrumbs()}</div>
 
           {/* User Widgets (XP status, Streak, Profile Avatar) */}
           <div className="flex items-center gap-4">
@@ -211,66 +215,77 @@ export const Navbar: React.FC<NavbarProps> = ({ children }) => {
             {/* Level status indicator */}
             {mounted && profile && (
               <div className="hidden md:flex flex-col items-end gap-0.5">
-                <span className="text-[10px] font-bold text-accent uppercase tracking-wider">Lvl {profile.level}</span>
-                <span className="text-[9px] text-zinc-400 font-semibold">{getLevelName(profile.level)}</span>
+                <span className="text-[10px] font-bold text-accent uppercase tracking-wider">
+                  Lvl {profile.level}
+                </span>
+                <span className="text-[9px] text-zinc-400 font-semibold">
+                  {getLevelName(profile.level)}
+                </span>
               </div>
             )}
 
             {/* User Profile avatar dropdown — keyboard accessible */}
-              <div className="relative">
-                <button
-                  onClick={() => setProfileMenuOpen((o) => !o)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Escape") setProfileMenuOpen(false);
-                  }}
-                  onBlur={(e) => {
-                    // Close when focus leaves the entire dropdown region
-                    if (!e.currentTarget.parentElement?.contains(e.relatedTarget as Node)) {
-                      setProfileMenuOpen(false);
-                    }
-                  }}
-                  id="profile-menu-button"
-                  aria-haspopup="true"
-                  aria-expanded={profileMenuOpen}
-                  aria-label="Open profile menu"
-                  className="w-8 h-8 rounded-full bg-accent/20 border border-accent/30 flex items-center justify-center font-bold text-accent font-syne text-xs shadow-inner overflow-hidden cursor-pointer hover:border-accent transition-all duration-300 select-none"
-                >
-                  {mounted && profile?.avatar_url ? (
-                    <img src={profile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
-                  ) : (
-                    mounted && profile?.username ? profile.username[0].toUpperCase() : "U"
-                  )}
-                </button>
-
-                {/* Keyboard-accessible logout dropdown */}
-                {profileMenuOpen && (
-                  <div
-                    role="menu"
-                    aria-labelledby="profile-menu-button"
-                    className="absolute right-0 top-9 w-36 glass-panel p-2 border border-white/5 bg-[#111811] shadow-xl rounded-xl z-50"
-                  >
-                    <button
-                      onClick={() => { handleLogOut(); setProfileMenuOpen(false); }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Escape") setProfileMenuOpen(false);
-                        if (e.key === "Tab") setProfileMenuOpen(false);
-                      }}
-                      role="menuitem"
-                      className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-red-400 hover:bg-red-500/10 rounded-lg transition-colors text-left cursor-pointer"
-                    >
-                      <LogOut className="w-3.5 h-3.5" />
-                      <span>Sign Out</span>
-                    </button>
-                  </div>
+            <div className="relative">
+              <button
+                onClick={() => setProfileMenuOpen((o) => !o)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") setProfileMenuOpen(false);
+                }}
+                onBlur={(e) => {
+                  // Close when focus leaves the entire dropdown region
+                  if (!e.currentTarget.parentElement?.contains(e.relatedTarget as Node)) {
+                    setProfileMenuOpen(false);
+                  }
+                }}
+                id="profile-menu-button"
+                aria-haspopup="true"
+                aria-expanded={profileMenuOpen}
+                aria-label="Open profile menu"
+                className="w-8 h-8 rounded-full bg-accent/20 border border-accent/30 flex items-center justify-center font-bold text-accent font-syne text-xs shadow-inner overflow-hidden cursor-pointer hover:border-accent transition-all duration-300 select-none"
+              >
+                {mounted && profile?.avatar_url ? (
+                  <img
+                    src={profile.avatar_url}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : mounted && profile?.username ? (
+                  profile.username[0].toUpperCase()
+                ) : (
+                  "U"
                 )}
-              </div>
+              </button>
+
+              {/* Keyboard-accessible logout dropdown */}
+              {profileMenuOpen && (
+                <div
+                  role="menu"
+                  aria-labelledby="profile-menu-button"
+                  className="absolute right-0 top-9 w-36 glass-panel p-2 border border-white/5 bg-[#111811] shadow-xl rounded-xl z-50"
+                >
+                  <button
+                    onClick={() => {
+                      handleLogOut();
+                      setProfileMenuOpen(false);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape") setProfileMenuOpen(false);
+                      if (e.key === "Tab") setProfileMenuOpen(false);
+                    }}
+                    role="menuitem"
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-red-400 hover:bg-red-500/10 rounded-lg transition-colors text-left cursor-pointer"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
         {/* Page children contents */}
-        <main className="flex-1 p-4 md:p-6 lg:p-8 flex flex-col justify-start">
-          {children}
-        </main>
+        <main className="flex-1 p-4 md:p-6 lg:p-8 flex flex-col justify-start">{children}</main>
       </div>
 
       {/* 3. MOBILE FLOATING FOOTER NAVIGATION LINK BAR (lg:hidden) */}
@@ -279,9 +294,9 @@ export const Navbar: React.FC<NavbarProps> = ({ children }) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
           return (
-            <Link 
-              key={item.href} 
-              href={item.href} 
+            <Link
+              key={item.href}
+              href={item.href}
               aria-label={item.name}
               aria-current={isActive ? "page" : undefined}
               className="flex flex-col items-center gap-1 p-2 rounded-full relative transition-all duration-300"

@@ -1,4 +1,12 @@
-import { Profile, PlanetState, SustainabilityLog, DailyChallenge, Achievement, ChatMessage, Group } from "@/types";
+import {
+  Profile,
+  PlanetState,
+  SustainabilityLog,
+  DailyChallenge,
+  Achievement,
+  ChatMessage,
+  Group,
+} from "@/types";
 
 export const DEFAULT_PROFILE: Profile = {
   id: "mock-user-id",
@@ -144,7 +152,8 @@ export const DEFAULT_CHATS: ChatMessage[] = [
     id: "chat-1",
     profile_id: "mock-user-id",
     sender: "ai",
-    message: "Hello! I am your AI Sustainability Twin. I am synchronized with your ecological logs and ready to help you optimize your carbon footprint. Ask me anything about transportation, recipe alternatives, energy saving, or simulations!",
+    message:
+      "Hello! I am your AI Sustainability Twin. I am synchronized with your ecological logs and ready to help you optimize your carbon footprint. Ask me anything about transportation, recipe alternatives, energy saving, or simulations!",
     created_at: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
   },
 ];

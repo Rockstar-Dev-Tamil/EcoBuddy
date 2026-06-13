@@ -4,14 +4,18 @@ export class GeminiChatService {
   /**
    * Sends a message to the AI Twin and returns the reply.
    */
-  static async sendMessage(message: string, history: ChatMessage[], context?: Record<string, unknown>): Promise<string> {
+  static async sendMessage(
+    message: string,
+    history: ChatMessage[],
+    context?: Record<string, unknown>
+  ): Promise<string> {
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message, history, context }),
       });
-      
+
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.error || "API Route returned an error status");

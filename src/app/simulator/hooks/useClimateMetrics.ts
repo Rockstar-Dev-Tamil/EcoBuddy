@@ -27,7 +27,7 @@ export function useClimateMetrics(activeYear: number) {
         aqiPercent: Math.min(100, (bauAqi / 300) * 100),
         forestCount: Math.round((bauForest / 40) * 8),
         seaPercent: Math.min(95, Math.max(15, (bauSea / 35) * 100)),
-        narration: `Under Business-As-Usual (BAU), high emissions drive temperatures up by +${bauTemp}°C. Smog increases local AQI to ${bauAqi} (poor), causing deforestation to drop to ${bauForest}% and pushing sea levels up by +${bauSea}cm.`
+        narration: `Under Business-As-Usual (BAU), high emissions drive temperatures up by +${bauTemp}°C. Smog increases local AQI to ${bauAqi} (poor), causing deforestation to drop to ${bauForest}% and pushing sea levels up by +${bauSea}cm.`,
       },
       eco: {
         temp: parseFloat(ecoTemp),
@@ -38,8 +38,8 @@ export function useClimateMetrics(activeYear: number) {
         aqiPercent: Math.min(100, (ecoAqi / 300) * 100),
         forestCount: Math.round((ecoForest / 40) * 8),
         seaPercent: Math.min(95, Math.max(15, (ecoSea / 35) * 100)),
-        narration: `With global offset logs, warming is capped at +${ecoTemp}°C. AQI clears to ${ecoAqi} (excellent), regional forests grow to ${ecoForest}%, and sea rise is limited to +${ecoSea}cm.`
-      }
+        narration: `With global offset logs, warming is capped at +${ecoTemp}°C. AQI clears to ${ecoAqi} (excellent), regional forests grow to ${ecoForest}%, and sea rise is limited to +${ecoSea}cm.`,
+      },
     };
   }, [activeYear]);
 }

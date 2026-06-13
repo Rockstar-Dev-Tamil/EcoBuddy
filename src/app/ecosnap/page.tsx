@@ -2,14 +2,7 @@
 
 import React, { useState } from "react";
 import { useGame } from "@/stores/game-store";
-import { 
-  Camera, 
-  FileText,
-  Check, 
-  HelpCircle,
-  Leaf, 
-  ShieldAlert 
-} from "lucide-react";
+import { Camera, FileText, Check, HelpCircle, Leaf, ShieldAlert } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GeminiEcoSnapService } from "@/services/gemini/ecosnap";
 
@@ -27,7 +20,12 @@ interface ScanResult {
 }
 
 // Circular progress indicator component for scores
-const ProgressCircle: React.FC<{ value: number; max: number; label: string; color: string }> = ({ value, max, label, color }) => {
+const ProgressCircle: React.FC<{ value: number; max: number; label: string; color: string }> = ({
+  value,
+  max,
+  label,
+  color,
+}) => {
   const r = 18;
   const circ = 2 * Math.PI * r;
   const offset = circ - (value / max) * circ;
@@ -36,21 +34,29 @@ const ProgressCircle: React.FC<{ value: number; max: number; label: string; colo
     <div className="flex flex-col items-center gap-1.5 bg-white/[0.02] border border-white/5 rounded-xl p-3 flex-1 min-w-[70px]">
       <div className="relative w-12 h-12 flex items-center justify-center shrink-0">
         <svg className="w-full h-full transform -rotate-90">
-          <circle cx="24" cy="24" r={r} className="stroke-zinc-800/80 fill-transparent" strokeWidth="2.5" />
-          <circle 
-            cx="24" 
-            cy="24" 
-            r={r} 
-            className={`${color} fill-transparent transition-all duration-700 ease-out`} 
-            strokeWidth="2.5" 
-            strokeDasharray={circ} 
-            strokeDashoffset={offset} 
+          <circle
+            cx="24"
+            cy="24"
+            r={r}
+            className="stroke-zinc-800/80 fill-transparent"
+            strokeWidth="2.5"
+          />
+          <circle
+            cx="24"
+            cy="24"
+            r={r}
+            className={`${color} fill-transparent transition-all duration-700 ease-out`}
+            strokeWidth="2.5"
+            strokeDasharray={circ}
+            strokeDashoffset={offset}
             strokeLinecap="round"
           />
         </svg>
         <span className="absolute text-[10px] font-bold font-mono text-zinc-100">{value}</span>
       </div>
-      <span className="text-[8px] text-zinc-500 font-extrabold uppercase tracking-wider text-center">{label}</span>
+      <span className="text-[8px] text-zinc-500 font-extrabold uppercase tracking-wider text-center">
+        {label}
+      </span>
     </div>
   );
 };
@@ -93,7 +99,7 @@ export default function EcoSnapPage() {
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [isLogged, setIsLogged] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  
+
   const [isDragActive, setIsDragActive] = useState(false);
   const [scanStep, setScanStep] = useState<number>(0);
 
@@ -102,18 +108,21 @@ export default function EcoSnapPage() {
     {
       name: "Mock Utility Bill",
       filename: "electricity-bill.pdf",
-      dataUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+      dataUrl:
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
     },
     {
       name: "Mock Grocery Receipt",
       filename: "supermarket-receipt.jpg",
-      dataUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+      dataUrl:
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
     },
     {
       name: "Mock Vegan Plate",
       filename: "healthy-dinner.png",
-      dataUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
-    }
+      dataUrl:
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+    },
   ];
 
   const handleDrag = (e: React.DragEvent) => {
@@ -156,7 +165,7 @@ export default function EcoSnapPage() {
     reader.readAsDataURL(file);
   };
 
-  const loadTemplate = (template: typeof mockTemplates[0]) => {
+  const loadTemplate = (template: (typeof mockTemplates)[0]) => {
     setFileName(template.filename);
     setSelectedImage(template.dataUrl);
     setErrorMsg("");
@@ -210,42 +219,50 @@ export default function EcoSnapPage() {
 
   const getCategoryColor = (cat: string) => {
     switch (cat) {
-      case "diet": return "text-emerald-400 bg-emerald-500/10 border-emerald-500/30";
-      case "energy": return "text-cyan-400 bg-cyan-500/10 border-cyan-500/30";
-      case "waste": return "text-amber-400 bg-amber-500/10 border-amber-500/30";
-      case "transport": return "text-indigo-400 bg-indigo-500/10 border-indigo-500/30";
-      default: return "text-zinc-400 bg-zinc-500/10 border-zinc-500/30";
+      case "diet":
+        return "text-emerald-400 bg-emerald-500/10 border-emerald-500/30";
+      case "energy":
+        return "text-cyan-400 bg-cyan-500/10 border-cyan-500/30";
+      case "waste":
+        return "text-amber-400 bg-amber-500/10 border-amber-500/30";
+      case "transport":
+        return "text-indigo-400 bg-indigo-500/10 border-indigo-500/30";
+      default:
+        return "text-zinc-400 bg-zinc-500/10 border-zinc-500/30";
     }
   };
 
   return (
     <div className="flex-1 flex flex-col pb-20 lg:pb-0 select-none">
-      
       {/* Introduction Banner Area */}
       <div className="max-w-7xl w-full mx-auto px-4 py-4 shrink-0">
-        <h1 className="font-cabinet font-extrabold text-2xl lg:text-3xl text-white tracking-tight">EcoSnap Vision Lab</h1>
+        <h1 className="font-cabinet font-extrabold text-2xl lg:text-3xl text-white tracking-tight">
+          EcoSnap Vision Lab
+        </h1>
         <p className="text-xs text-zinc-400 mt-1">
-          OCR bill scanning & image vision powered by Gemini. Simply upload any receipt or grocery plate.
+          OCR bill scanning & image vision powered by Gemini. Simply upload any receipt or grocery
+          plate.
         </p>
       </div>
 
       <section className="flex-1 max-w-7xl w-full mx-auto px-4 py-2 grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-        
         {/* Left Pane: Scan Upload Zone (5 columns) */}
         <div className="lg:col-span-5 flex flex-col gap-6">
           <div className="glass-panel p-6 rounded-2xl border border-white/5 flex flex-col justify-between h-full bg-zinc-950/20">
             <div>
-              <span className="text-[9px] text-zinc-500 uppercase font-bold tracking-widest block mb-4">Laboratory Input</span>
-              
+              <span className="text-[9px] text-zinc-500 uppercase font-bold tracking-widest block mb-4">
+                Laboratory Input
+              </span>
+
               {/* Upload Card */}
-              <div 
+              <div
                 onDragEnter={handleDrag}
                 onDragOver={handleDrag}
                 onDragLeave={handleDrag}
                 onDrop={handleDrop}
                 className={`relative border-2 border-dashed rounded-2xl p-6 aspect-video sm:aspect-square flex flex-col items-center justify-center bg-zinc-950/40 transition-all duration-300 ${
-                  isDragActive 
-                    ? "border-[#00E676] shadow-[0_0_20px_rgba(0,230,118,0.2)] bg-emerald-500/5 scale-[1.01]" 
+                  isDragActive
+                    ? "border-[#00E676] shadow-[0_0_20px_rgba(0,230,118,0.2)] bg-emerald-500/5 scale-[1.01]"
                     : "border-zinc-800 hover:border-accent/40"
                 }`}
               >
@@ -261,8 +278,12 @@ export default function EcoSnapPage() {
                 {selectedImage ? (
                   <div className="relative w-full h-full rounded-xl overflow-hidden bg-black flex items-center justify-center">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={selectedImage} alt={`Preview of uploaded file: ${fileName}`} className="w-full h-full object-cover opacity-75" />
-                    
+                    <img
+                      src={selectedImage}
+                      alt={`Preview of uploaded file: ${fileName}`}
+                      className="w-full h-full object-cover opacity-75"
+                    />
+
                     {/* Glowing Laser Scan beam */}
                     {isScanning && (
                       <div className="absolute left-0 right-0 h-1 bg-[#00E676] shadow-[0_0_15px_#00e676] animate-scan z-10" />
@@ -273,15 +294,21 @@ export default function EcoSnapPage() {
                     <div className="p-4 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-500 mb-3 animate-pulse">
                       <Camera className="w-6 h-6" />
                     </div>
-                    <span className="text-xs font-bold text-zinc-300">Drag & drop receipt/meal photo here</span>
-                    <span className="text-[10px] text-zinc-500 mt-1 block">PNG, JPG or WEBP formats</span>
+                    <span className="text-xs font-bold text-zinc-300">
+                      Drag & drop receipt/meal photo here
+                    </span>
+                    <span className="text-[10px] text-zinc-500 mt-1 block">
+                      PNG, JPG or WEBP formats
+                    </span>
                   </div>
                 )}
               </div>
 
               {/* Demo presets */}
               <div className="mt-6">
-                <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest block mb-2.5">Demo Presets</span>
+                <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest block mb-2.5">
+                  Demo Presets
+                </span>
                 <div className="grid grid-cols-3 gap-2">
                   {mockTemplates.map((t, idx) => (
                     <button
@@ -307,7 +334,7 @@ export default function EcoSnapPage() {
                       { id: 1, text: "Reading image & extracting raw OCR text layers..." },
                       { id: 2, text: "Cross-referencing Agribalyse agricultural datasets..." },
                       { id: 3, text: "Consulting Open Food Facts database..." },
-                      { id: 4, text: "Calibrating carbon equivalents & green index ratings..." }
+                      { id: 4, text: "Calibrating carbon equivalents & green index ratings..." },
                     ].map((step) => {
                       const isDone = scanStep > step.id || scanStep === 5;
                       const isActive = scanStep === step.id;
@@ -320,7 +347,15 @@ export default function EcoSnapPage() {
                           ) : (
                             <span className="w-1.5 h-1.5 rounded-full bg-zinc-800" />
                           )}
-                          <span className={isDone ? "text-zinc-400" : isActive ? "text-accent font-bold" : "text-zinc-650"}>
+                          <span
+                            className={
+                              isDone
+                                ? "text-zinc-400"
+                                : isActive
+                                  ? "text-accent font-bold"
+                                  : "text-zinc-650"
+                            }
+                          >
                             {step.text}
                           </span>
                         </div>
@@ -336,7 +371,11 @@ export default function EcoSnapPage() {
                 onClick={handleScan}
                 disabled={isScanning}
                 id="btn-scan-action"
-                aria-label={isScanning ? "Scanning image, please wait" : "Trigger AI Vision Analysis on uploaded image"}
+                aria-label={
+                  isScanning
+                    ? "Scanning image, please wait"
+                    : "Trigger AI Vision Analysis on uploaded image"
+                }
                 className="w-full mt-6 py-3.5 bg-accent hover:bg-accent-bright text-black font-syne font-bold rounded-full text-xs flex items-center justify-center gap-2 shadow-lg hover:shadow-accent/20 cursor-pointer disabled:opacity-50 hover:scale-[1.01] transition-all"
               >
                 {isScanning ? (
@@ -386,25 +425,29 @@ export default function EcoSnapPage() {
                   {/* Category and Title */}
                   <div className="flex items-start justify-between border-b border-white/5 pb-4 mb-4">
                     <div>
-                      <span className={`inline-block px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider border ${getCategoryColor(scanResult.category)}`}>
+                      <span
+                        className={`inline-block px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider border ${getCategoryColor(scanResult.category)}`}
+                      >
                         {scanResult.category}
                       </span>
-                      <h2 className="font-syne font-bold text-base md:text-lg text-zinc-100 mt-2">{scanResult.description}</h2>
+                      <h2 className="font-syne font-bold text-base md:text-lg text-zinc-100 mt-2">
+                        {scanResult.description}
+                      </h2>
                     </div>
 
                     {/* Progress Rings */}
                     <div className="flex items-center gap-3">
-                      <ProgressCircle 
-                        value={scanResult.sustainabilityScore} 
-                        max={100} 
-                        label="Sustainability" 
-                        color="stroke-accent" 
+                      <ProgressCircle
+                        value={scanResult.sustainabilityScore}
+                        max={100}
+                        label="Sustainability"
+                        color="stroke-accent"
                       />
-                      <ProgressCircle 
-                        value={scanResult.confidence} 
-                        max={100} 
-                        label="Confidence" 
-                        color="stroke-secondary" 
+                      <ProgressCircle
+                        value={scanResult.confidence}
+                        max={100}
+                        label="Confidence"
+                        color="stroke-secondary"
                       />
                     </div>
                   </div>
@@ -412,23 +455,32 @@ export default function EcoSnapPage() {
                   {/* CO2 statistics counter */}
                   <div className="grid grid-cols-3 gap-4 mb-6">
                     <div className="bg-white/5 border border-white/5 rounded-xl p-3.5 text-center">
-                      <span className="text-[9px] text-zinc-500 block uppercase font-bold tracking-wider">Carbon Emitted</span>
+                      <span className="text-[9px] text-zinc-500 block uppercase font-bold tracking-wider">
+                        Carbon Emitted
+                      </span>
                       <span className="font-outfit font-extrabold text-base md:text-lg text-white mt-1 block">
                         {scanResult.co2Emission} kg
                       </span>
                     </div>
 
                     <div className="bg-white/5 border border-white/5 rounded-xl p-3.5 text-center">
-                      <span className="text-[9px] text-zinc-500 block uppercase font-bold tracking-wider">Baseline Offset</span>
-                      <span className={`font-outfit font-extrabold text-base md:text-lg mt-1 block ${
-                        scanResult.carbonOffset >= 0 ? "text-accent" : "text-red-400"
-                      }`}>
-                        {scanResult.carbonOffset >= 0 ? "+" : ""}{scanResult.carbonOffset} kg
+                      <span className="text-[9px] text-zinc-500 block uppercase font-bold tracking-wider">
+                        Baseline Offset
+                      </span>
+                      <span
+                        className={`font-outfit font-extrabold text-base md:text-lg mt-1 block ${
+                          scanResult.carbonOffset >= 0 ? "text-accent" : "text-red-400"
+                        }`}
+                      >
+                        {scanResult.carbonOffset >= 0 ? "+" : ""}
+                        {scanResult.carbonOffset} kg
                       </span>
                     </div>
 
                     <div className="bg-white/5 border border-white/5 rounded-xl p-3.5 text-center">
-                      <span className="text-[9px] text-zinc-500 block uppercase font-bold tracking-wider">XP reward</span>
+                      <span className="text-[9px] text-zinc-500 block uppercase font-bold tracking-wider">
+                        XP reward
+                      </span>
                       <span className="font-outfit font-extrabold text-base md:text-lg text-yellow-400 mt-1 block">
                         +{scanResult.xpEarned}
                       </span>
@@ -439,10 +491,14 @@ export default function EcoSnapPage() {
                   <div className="glass-panel p-4.5 rounded-2xl border border-white/5 bg-white/[0.02] flex gap-4 items-start mb-6">
                     <MiniSprig />
                     <div className="flex-1 text-xs text-zinc-300 leading-relaxed relative bg-zinc-950/40 px-3.5 py-2.5 rounded-xl border border-white/5">
-                      <span className="font-syne font-bold text-accent block mb-1">Sprig&apos;s Vision Summary</span>
+                      <span className="font-syne font-bold text-accent block mb-1">
+                        Sprig&apos;s Vision Summary
+                      </span>
                       <p>
-                        &quot;I analyzed this photo! I detected {scanResult.description} (a {scanResult.category} category). 
-                        {scanResult.alternatives.length > 0 && ` If you substitute this with '${scanResult.alternatives[0].name}', you could offset about ${scanResult.alternatives[0].carbonSaving} kg CO₂! `}
+                        &quot;I analyzed this photo! I detected {scanResult.description} (a{" "}
+                        {scanResult.category} category).
+                        {scanResult.alternatives.length > 0 &&
+                          ` If you substitute this with '${scanResult.alternatives[0].name}', you could offset about ${scanResult.alternatives[0].carbonSaving} kg CO₂! `}
                         Log this item to ledger now to secure your +{scanResult.xpEarned} XP!&quot;
                       </p>
                     </div>
@@ -451,13 +507,22 @@ export default function EcoSnapPage() {
                   {/* Alternatives */}
                   {scanResult.alternatives.length > 0 && (
                     <div className="mb-6">
-                      <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest block mb-3">Suggested Carbon-Offset Alternatives</span>
+                      <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest block mb-3">
+                        Suggested Carbon-Offset Alternatives
+                      </span>
                       <div className="flex flex-col gap-2.5">
                         {scanResult.alternatives.map((alt, idx) => (
-                          <div key={idx} className="p-3 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-emerald-500/20 rounded-xl transition-all duration-300 flex items-center justify-between gap-4">
+                          <div
+                            key={idx}
+                            className="p-3 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-emerald-500/20 rounded-xl transition-all duration-300 flex items-center justify-between gap-4"
+                          >
                             <div>
-                              <span className="text-xs font-semibold text-zinc-200 block">{alt.name}</span>
-                              <span className="text-[10px] text-zinc-500 mt-0.5 block">{alt.description}</span>
+                              <span className="text-xs font-semibold text-zinc-200 block">
+                                {alt.name}
+                              </span>
+                              <span className="text-[10px] text-zinc-500 mt-0.5 block">
+                                {alt.description}
+                              </span>
                             </div>
                             <span className="text-[10px] font-extrabold px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-accent shrink-0">
                               Save {alt.carbonSaving} kg
@@ -474,7 +539,11 @@ export default function EcoSnapPage() {
                   onClick={handleLogToLedger}
                   disabled={isLogged}
                   id="btn-log-action"
-                  aria-label={isLogged ? "Action already logged to your ledger" : "Log this sustainability action and earn XP"}
+                  aria-label={
+                    isLogged
+                      ? "Action already logged to your ledger"
+                      : "Log this sustainability action and earn XP"
+                  }
                   className={`w-full py-3.5 rounded-full font-syne font-bold text-xs flex items-center justify-center gap-2 border transition-all duration-300 cursor-pointer ${
                     isLogged
                       ? "bg-emerald-500/10 border-emerald-500/30 text-accent"
@@ -497,15 +566,17 @@ export default function EcoSnapPage() {
             ) : (
               <div className="glass-panel p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center justify-center h-full min-h-[400px] bg-zinc-950/20">
                 <HelpCircle className="w-12 h-12 text-zinc-650 mb-3" />
-                <h3 className="font-syne font-bold text-sm text-zinc-300 uppercase tracking-wider">Awaiting Scan Input</h3>
+                <h3 className="font-syne font-bold text-sm text-zinc-300 uppercase tracking-wider">
+                  Awaiting Scan Input
+                </h3>
                 <p className="text-xs text-zinc-500 max-w-xs mt-2 leading-relaxed">
-                  Trigger an AI scanner analysis on the left to extract carbon footprints, sustainability ratings, and Sprig companion advice.
+                  Trigger an AI scanner analysis on the left to extract carbon footprints,
+                  sustainability ratings, and Sprig companion advice.
                 </p>
               </div>
             )}
           </AnimatePresence>
         </div>
-
       </section>
     </div>
   );

@@ -27,7 +27,7 @@ export interface SustainabilityLog {
   category: "food" | "transportation" | "electricity" | "shopping" | "water" | "waste" | string;
   description: string;
   carbon_offset: number; // positive for offsets/reductions (kg)
-  co2_emission: number;  // absolute emission (kg)
+  co2_emission: number; // absolute emission (kg)
   xp_earned: number;
   created_at: string;
 }

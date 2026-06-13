@@ -1,6 +1,13 @@
-
-
-import { Profile, PlanetState, SustainabilityLog, DailyChallenge, Achievement, LeaderboardEntry, ChatMessage, Group } from "@/types";
+import {
+  Profile,
+  PlanetState,
+  SustainabilityLog,
+  DailyChallenge,
+  Achievement,
+  LeaderboardEntry,
+  ChatMessage,
+  Group,
+} from "@/types";
 
 import {
   DEFAULT_PROFILE,
@@ -23,7 +30,7 @@ export const MockDB = {
   updateProfile: (updates: Partial<Profile>): Profile => {
     const profile = MockDB.getProfile();
     const updated = { ...profile, ...updates };
-    
+
     // Check level progression based on XP (every 1000 XP is a level)
     if (updates.xp !== undefined) {
       const calculatedLevel = Math.max(1, Math.floor(updated.xp / 1000) + 1);
@@ -51,9 +58,16 @@ export const MockDB = {
       ...updates,
       last_updated: new Date().toISOString(),
     };
-    
+
     // Bound values between 0.0 and 1.0
-    const keys = ["vegetation", "rivers", "wildlife", "atmosphere_clarity", "pollution", "desertification"] as const;
+    const keys = [
+      "vegetation",
+      "rivers",
+      "wildlife",
+      "atmosphere_clarity",
+      "pollution",
+      "desertification",
+    ] as const;
     keys.forEach((key) => {
       if (updated[key] !== undefined) {
         updated[key] = Math.max(0, Math.min(1, updated[key]));
@@ -74,7 +88,7 @@ export const MockDB = {
     const logs = getStorageItem(STORAGE_KEYS.LOGS, DEFAULT_LOGS);
     const profile = MockDB.getProfile();
     const planet = MockDB.getPlanetState();
-    
+
     const newLog: SustainabilityLog = {
       ...log,
       id: "log-" + Math.random().toString(36).substring(2, 9),
@@ -89,9 +103,10 @@ export const MockDB = {
     const newXP = profile.xp + log.xp_earned;
     // Calculate new green score based on impact: positive offset increases, negative offsets (emissions) decrease
     // Max step change is 5 points
-    const scoreDelta = log.carbon_offset > 0 
-      ? Math.min(5, Math.ceil(log.carbon_offset * 2)) 
-      : -Math.min(8, Math.ceil(Math.abs(log.carbon_offset) * 2.5));
+    const scoreDelta =
+      log.carbon_offset > 0
+        ? Math.min(5, Math.ceil(log.carbon_offset * 2))
+        : -Math.min(8, Math.ceil(Math.abs(log.carbon_offset) * 2.5));
     const newGreenScore = Math.max(10, Math.min(100, profile.green_score + scoreDelta));
 
     MockDB.updateProfile({
@@ -102,12 +117,12 @@ export const MockDB = {
     // 2. Adjust Planet State based on Log Category & carbon impact
     const isPositive = log.carbon_offset > 0;
     const offsetMagnitude = Math.abs(log.carbon_offset);
-    
+
     const planetUpdates: Partial<PlanetState> = {};
     if (isPositive) {
       planetUpdates.pollution = planet.pollution - offsetMagnitude * 0.03;
       planetUpdates.desertification = planet.desertification - offsetMagnitude * 0.02;
-      
+
       if (log.category === "transport") {
         planetUpdates.atmosphere_clarity = planet.atmosphere_clarity + offsetMagnitude * 0.05;
       } else if (log.category === "diet") {
@@ -126,7 +141,7 @@ export const MockDB = {
       planetUpdates.vegetation = planet.vegetation - offsetMagnitude * 0.02;
       planetUpdates.wildlife = planet.wildlife - offsetMagnitude * 0.03;
     }
-    
+
     MockDB.updatePlanetState(planetUpdates);
 
     // 3. Increment challenge if matching category
@@ -145,10 +160,11 @@ export const MockDB = {
 
     const modified = challenges.map((ch) => {
       // Match by category
-      const matches = ch.category === actionCategory || 
-                      (ch.action_type === "log_transport" && actionCategory === "transport") ||
-                      (ch.action_type === "scan_receipt" && actionCategory === "energy") ||
-                      (ch.action_type === "scan_meal" && actionCategory === "diet");
+      const matches =
+        ch.category === actionCategory ||
+        (ch.action_type === "log_transport" && actionCategory === "transport") ||
+        (ch.action_type === "scan_receipt" && actionCategory === "energy") ||
+        (ch.action_type === "scan_meal" && actionCategory === "diet");
 
       if (matches && !ch.completed) {
         const newVal = Math.min(ch.target_value, ch.current_value + increment);
@@ -202,7 +218,7 @@ export const MockDB = {
           unlocked_at: new Date().toISOString(),
         };
         updated = true;
-        
+
         // Award reward XP
         const profile = MockDB.getProfile();
         MockDB.updateProfile({ xp: profile.xp + ach.xp_reward });

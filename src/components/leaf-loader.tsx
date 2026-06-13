@@ -1,30 +1,42 @@
 "use client";
 
-import React, { } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 
 export const LeafLoader: React.FC = () => {
-  const [particles, setParticles] = React.useState<Array<{id: number, size: number, startX: number, startY: number, endX: number, endY: number, duration: number, delay: number}>>([]);
+  const [particles, setParticles] = React.useState<
+    Array<{
+      id: number;
+      size: number;
+      startX: number;
+      startY: number;
+      endX: number;
+      endY: number;
+      duration: number;
+      delay: number;
+    }>
+  >([]);
 
   React.useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setParticles(Array.from({ length: 16 }).map((_, i) => ({
-      id: i,
-      size: Math.floor(Math.random() * 4) + 2,
-      startX: (Math.random() - 0.5) * 30,
-      startY: (Math.random() - 0.5) * 30,
-      endX: (Math.random() - 0.5) * 120,
-      endY: -100 - Math.random() * 100,
-      duration: 2.5 + Math.random() * 2.5,
-      delay: Math.random() * 2,
-    })));
+    setParticles(
+      Array.from({ length: 16 }).map((_, i) => ({
+        id: i,
+        size: Math.floor(Math.random() * 4) + 2,
+        startX: (Math.random() - 0.5) * 30,
+        startY: (Math.random() - 0.5) * 30,
+        endX: (Math.random() - 0.5) * 120,
+        endY: -100 - Math.random() * 100,
+        duration: 2.5 + Math.random() * 2.5,
+        delay: Math.random() * 2,
+      }))
+    );
   }, []);
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0A0F0A]">
       {/* Container holding loader, leaf & particles */}
       <div className="relative w-48 h-48 flex items-center justify-center">
-        
         {/* Glowing Halo Background */}
         <motion.div
           className="absolute w-28 h-28 rounded-full bg-accent-dim/20 filter blur-xl"
@@ -91,7 +103,7 @@ export const LeafLoader: React.FC = () => {
               duration: 2.2,
               repeat: Infinity,
               ease: "easeInOut",
-            }
+            },
           }}
         >
           {/* Leaf SVG Icon */}
