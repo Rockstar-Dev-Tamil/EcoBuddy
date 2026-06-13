@@ -185,6 +185,7 @@ export default function LandingPage() {
         const { error } = await supabase!.auth.signInWithOtp({
           email,
           options: {
+            shouldCreateUser: isSignUp,
             data: isSignUp
               ? {
                   username: username.trim(),
